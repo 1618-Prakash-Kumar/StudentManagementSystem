@@ -9,5 +9,6 @@ public class BackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BackendApplication.class, args);
 	}
-
+	// Super Admin email-admin@campus.edu
+	//  ,,    ,,   pass -Admin@123
 }

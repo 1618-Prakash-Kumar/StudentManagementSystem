@@ -3,17 +3,21 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Register.css";
 
 function RegisterForm() {
-
     const navigate = useNavigate();
 
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
+    const [message, setMessage] = useState("");
+    const [isError, setIsError] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
-
         e.preventDefault();
+        setMessage("");
+        setIsError(false);
+        setLoading(true);
 
         const registerData = {
             fullName,
@@ -23,103 +27,103 @@ function RegisterForm() {
         };
 
         try {
-
             const response = await fetch("http://localhost:8080/api/auth/register", {
-
                 method: "POST",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify(registerData)
-
             });
 
             const result = await response.text();
 
-            alert(result);
-            
             if (result === "Registration Successful") {
-
-                navigate("/login");
-
+                setMessage("Registration successful! Redirecting to login...");
+                setIsError(false);
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1200);
+            } else {
+                setMessage(result);
+                setIsError(true);
             }
-
-            setFullName("");
-            setEmail("");
-            setPassword("");
-            setPhone("");
-
-        }catch (error) {
+        } catch (error) {
             console.error("ERROR:", error);
-            alert(error.message);
+            setMessage("Failed to connect to backend server");
+            setIsError(true);
+        } finally {
+            setLoading(false);
         }
-
     };
 
     return (
+        <div className="register-page" style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", background: "#f4f6f9" }}>
+            <div className="register-container">
+                <h1>College Exchange</h1>
+                <h2>Create Student Account</h2>
 
-        <div className="register-container">
+                {message && (
+                    <div style={{
+                        padding: "10px",
+                        marginBottom: "15px",
+                        borderRadius: "6px",
+                        background: isError ? "#fee2e2" : "#dcfce7",
+                        color: isError ? "#b91c1c" : "#15803d",
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        textAlign: "center"
+                    }}>
+                        {message}
+                    </div>
+                )}
 
-            <h1>Campus Exchange</h1>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        placeholder="Full Name (e.g. John Doe)"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        required
+                    />
 
-            <h2>Create Account</h2>
+                    <input
+                        type="email"
+                        placeholder="Campus / Personal Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
 
-            <form onSubmit={handleSubmit}>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
 
-                <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                />
+                    <input
+                        type="tel"
+                        placeholder="Contact Phone Number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                    />
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+                    <button type="submit" disabled={loading}>
+                        {loading ? "Registering..." : "Create Account"}
+                    </button>
+                </form>
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-
-                <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                />
-
-                <button type="submit">
-                    Register
-                </button>
-
-            </form>
-
-            <p className="login-link">
-
-                Already have an account?
-
-                <span onClick={() => navigate("/login")}>
-                    Login
-                </span>
-
-            </p>
-
+                <p className="login-link">
+                    Already have an account?{" "}
+                    <span onClick={() => navigate("/login")}>
+                        Login
+                    </span>
+                </p>
+            </div>
         </div>
-
     );
-
 }
 
 export default RegisterForm;

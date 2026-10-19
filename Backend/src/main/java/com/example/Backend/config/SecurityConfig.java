@@ -8,12 +8,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -34,7 +36,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // Authorization
+                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
 
                         // Public APIs
@@ -56,11 +58,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/categories/**")
                         .hasRole("ADMIN")
 
+                        // Admin APIs (Protected: ADMIN role required)
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+
                         // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
 
-                // Disable default login
+                // Disable default login forms
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
 

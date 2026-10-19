@@ -1,6 +1,7 @@
 package com.example.Backend.entity;
 
 public enum Role {
-    STUDENT,
-    ADMIN
+    USER,
+    ADMIN,
+    STUDENT
 }

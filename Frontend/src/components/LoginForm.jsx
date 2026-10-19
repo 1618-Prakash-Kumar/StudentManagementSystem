@@ -3,14 +3,17 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 
 function LoginForm() {
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMsg("");
+        setLoading(true);
 
         const loginData = {
             email,
@@ -18,7 +21,6 @@ function LoginForm() {
         };
 
         try {
-
             const response = await fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
                 headers: {
@@ -29,69 +31,68 @@ function LoginForm() {
 
             const result = await response.json();
 
-            if(result.message === "Login Successful"){
-                
-                localStorage.setItem("token",result.token);
+            if (result.message === "Login Successful") {
+                localStorage.setItem("token", result.token);
+                localStorage.setItem("userEmail", email);
+                localStorage.setItem("userRole", result.role || "USER");
 
-                alert(result.message);
-                if(result.role === "ADMIN"){
+                if (result.role === "ADMIN") {
                     navigate("/admin");
-                }else{
+                } else {
                     navigate("/home");
                 }
-                
-
-            }else{
-
-                alert(result.message);
-
+            } else {
+                setErrorMsg(result.message || "Invalid credentials");
             }
-
-            setEmail("");
-            setPassword("");
-
         } catch (error) {
-
             console.error("ERROR:", error);
-            alert(error.message);
-
+            setErrorMsg("Cannot connect to server. Please ensure backend is running.");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
+        <div className="login-page">
+            <div className="login-container">
+                <h1>College Exchange</h1>
+                <h2>Student Marketplace Login</h2>
 
-        <div className="login-container">
+                {errorMsg && <div className="login-error-alert">{errorMsg}</div>}
 
-            <h1>Campus Exchange</h1>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="email"
+                        placeholder="Enter Student / Admin Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
 
-            <h2>Login</h2>
+                    <input
+                        type="password"
+                        placeholder="Enter Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
 
-            <form onSubmit={handleSubmit}>
+                    <button type="submit" disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
+                    </button>
+                </form>
 
-                <input
-                    type="email"
-                    placeholder="Enter Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-
-                <input
-                    type="password"
-                    placeholder="Enter Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-
-                <button type="submit">
-                    Login
-                </button>
-
-            </form>
-
+                <p className="register-link" style={{ marginTop: "18px", textAlign: "center", color: "#6b7280" }}>
+                    Don't have an account?{" "}
+                    <span 
+                        onClick={() => navigate("/register")} 
+                        style={{ color: "#0d6efd", fontWeight: "bold", cursor: "pointer" }}
+                    >
+                        Register
+                    </span>
+                </p>
+            </div>
         </div>
-
     );
 }
 

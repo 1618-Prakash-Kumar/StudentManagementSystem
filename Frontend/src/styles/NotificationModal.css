@@ -1,0 +1,254 @@
+/* Notification Modal Styles */
+.notif-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.notif-modal-container {
+    width: 100%;
+    max-width: 520px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 25px rgba(0, 0, 0, 0.15);
+    animation: slideInRight 0.25s ease-out;
+}
+
+.notif-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.notif-header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notif-header-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.notif-unread-count-pill {
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.notif-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mark-all-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #e2e8f0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mark-all-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.notif-close-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 4px;
+}
+
+.notif-close-btn:hover {
+    color: #ffffff;
+}
+
+.notif-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+}
+
+.notif-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+}
+
+.notif-empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+}
+
+.notif-empty-state h3 {
+    margin: 0 0 8px;
+    color: #1e293b;
+    font-size: 1.2rem;
+}
+
+.notif-empty-state p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.notif-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.notif-card {
+    position: relative;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.notif-card:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+}
+
+.notif-card.unread {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.notif-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notif-type-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #2563eb;
+    background: #dbeafe;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.notif-time {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.notif-product-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.notif-product-title {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.notif-quantity-badge {
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.notif-buyer-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.buyer-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.86rem;
+}
+
+.buyer-label {
+    font-weight: 600;
+    color: #64748b;
+    width: 60px;
+}
+
+.buyer-val {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.buyer-link {
+    font-weight: 600;
+    text-decoration: none;
+    transition: text-decoration 0.2s;
+}
+
+.buyer-phone {
+    color: #059669;
+}
+
+.buyer-phone:hover {
+    text-decoration: underline;
+}
+
+.buyer-email {
+    color: #2563eb;
+}
+
+.buyer-email:hover {
+    text-decoration: underline;
+}
+
+.notif-unread-dot {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+}
