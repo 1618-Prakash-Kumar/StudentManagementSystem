@@ -1,0 +1,569 @@
+.my-listings-page {
+    min-height: 100vh;
+    padding: 32px max(20px, calc((100vw - 1160px) / 2));
+    background: #f3f6f9;
+    color: #172331;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.my-listings-header {
+    max-width: 1160px;
+    margin: 0 auto 24px;
+}
+
+.my-listings-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 24px;
+    padding: 0;
+    color: #365575;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.my-listings-back:hover {
+    color: #17478d;
+}
+
+.my-listings-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.my-listings-eyebrow {
+    margin: 0 0 6px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.my-listings-heading h1 {
+    margin: 0;
+    color: #152334;
+    font-size: clamp(28px, 4vw, 36px);
+    letter-spacing: -0.035em;
+}
+
+.my-listings-description {
+    margin: 8px 0 0;
+    color: #657487;
+    font-size: 15px;
+}
+
+.my-listings-primary,
+.my-listings-secondary {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.my-listings-primary {
+    color: #fff;
+    background: #1769aa;
+}
+
+.my-listings-primary:hover {
+    background: #12578f;
+}
+
+.my-listings-primary:disabled,
+.my-listings-secondary:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.my-listings-secondary {
+    color: #334155;
+    border-color: #cbd5e1;
+    background: #fff;
+}
+
+.my-listings-secondary:hover {
+    background: #f8fafc;
+}
+
+.my-listings-content {
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.my-listings-summary {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.my-listings-summary > div {
+    min-width: 170px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 14px 17px;
+    border: 1px solid #e0e6ed;
+    background: #fff;
+}
+
+.my-listings-summary span {
+    color: #667587;
+    font-size: 13px;
+}
+
+.my-listings-summary strong {
+    color: #172331;
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.my-listings-notice,
+.my-listings-error {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.my-listings-notice {
+    color: #166534;
+    border-color: #bbdec6;
+    background: #f0f9f2;
+}
+
+.my-listings-error {
+    color: #9b2525;
+    border-color: #f0c5c5;
+    background: #fff5f5;
+}
+
+.my-listings-filters {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #dce3eb;
+}
+
+.my-listings-filters button {
+    padding: 11px 14px;
+    color: #566579;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.my-listings-filters button:hover,
+.my-listings-filters button.selected {
+    color: #1769aa;
+}
+
+.my-listings-filters button.selected {
+    border-bottom-color: #1769aa;
+}
+
+.my-listings-state,
+.my-listings-empty {
+    padding: 56px 20px;
+    color: #64748b;
+    text-align: center;
+}
+
+.my-listings-empty {
+    border: 1px solid #e0e6ed;
+    background: #fff;
+}
+
+.my-listings-empty > svg {
+    color: #8291a1;
+}
+
+.my-listings-empty h2 {
+    margin: 12px 0 6px;
+    color: #253447;
+    font-size: 20px;
+}
+
+.my-listings-empty p {
+    margin: 0 0 20px;
+    font-size: 14px;
+}
+
+.my-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 335px), 1fr));
+    gap: 16px;
+}
+
+.my-listing-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #e0e6ed;
+    background: #fff;
+}
+
+.my-listing-image,
+.my-listing-image-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.my-listing-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    color: #8995a2;
+    background: #e9eef3;
+    font-size: 12px;
+}
+
+.my-listing-body {
+    padding: 16px;
+}
+
+.my-listing-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.my-listing-title-row h2 {
+    margin: 0;
+    color: #1c2a3a;
+    font-size: 17px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.my-listing-status {
+    flex: 0 0 auto;
+    padding: 4px 7px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.my-listing-status.available {
+    color: #166534;
+    background: #edf7ef;
+}
+
+.my-listing-status.unavailable {
+    color: #72521c;
+    background: #fbf4e5;
+}
+
+.my-listing-price {
+    display: block;
+    margin-top: 9px;
+    color: #152334;
+    font-size: 19px;
+}
+
+.my-listing-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px 14px;
+    margin: 16px 0;
+}
+
+.my-listing-details div {
+    min-width: 0;
+}
+
+.my-listing-details dt {
+    margin-bottom: 3px;
+    color: #728092;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.my-listing-details dd {
+    margin: 0;
+    color: #354458;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.my-listing-actions {
+    display: flex;
+    gap: 9px;
+    border-top: 1px solid #edf0f3;
+    padding-top: 13px;
+}
+
+.my-listing-actions button {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 12px;
+    border: 1px solid #d8e0e8;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.my-listing-edit {
+    color: #245a8d;
+}
+
+.my-listing-delete {
+    color: #a33333;
+}
+
+.my-listing-actions button:hover {
+    background: #f7f9fb;
+}
+
+.my-listing-actions button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.my-listing-editor {
+    max-width: 920px;
+    padding: 24px;
+    border: 1px solid #e0e6ed;
+    background: #fff;
+}
+
+.my-listing-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.my-listing-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    color: #344256;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.my-listing-form input,
+.my-listing-form textarea,
+.my-listing-form select {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 11px;
+    color: #172331;
+    border: 1px solid #cbd5df;
+    border-radius: 3px;
+    background: #fff;
+    font: inherit;
+    font-size: 14px;
+}
+
+.my-listing-form textarea {
+    resize: vertical;
+}
+
+.my-listing-form input:focus,
+.my-listing-form textarea:focus,
+.my-listing-form select:focus,
+.my-listing-upload:focus-within {
+    border-color: #3178b5;
+    outline: 3px solid rgb(49 120 181 / 18%);
+    outline-offset: 1px;
+}
+
+.my-listing-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.my-listing-images {
+    padding-top: 5px;
+    border-top: 1px solid #e6ebf0;
+}
+
+.my-listing-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 17px 0 12px;
+}
+
+.my-listing-section-heading h2 {
+    margin: 0;
+    color: #26364a;
+    font-size: 16px;
+}
+
+.my-listing-section-heading p {
+    margin: 5px 0 0;
+    color: #718094;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.my-listing-upload {
+    flex: 0 0 auto;
+    display: inline-flex !important;
+    align-items: center;
+    flex-direction: row !important;
+    gap: 7px !important;
+    padding: 9px 11px;
+    color: #245a8d !important;
+    border: 1px solid #cbd5df;
+    background: #fff;
+    cursor: pointer;
+}
+
+.my-listing-upload input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+.my-listing-image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+}
+
+.my-listing-image-item {
+    min-width: 0;
+    position: relative;
+    border: 1px solid #dfe5eb;
+    background: #f2f4f6;
+}
+
+.my-listing-image-item img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    display: block;
+    object-fit: cover;
+}
+
+.my-listing-image-item > span {
+    display: block;
+    padding: 5px 7px;
+    color: #6b7785;
+    background: #fff;
+    font-size: 11px;
+}
+
+.my-listing-image-item button {
+    width: 29px;
+    height: 29px;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    color: #7e2424;
+    border: 1px solid #d8dfe6;
+    background: #fff;
+    cursor: pointer;
+}
+
+.my-listing-image-item button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.my-listing-pending-image {
+    outline: 1px dashed #8696a7;
+    outline-offset: -3px;
+}
+
+.my-listing-no-images {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 18px 0;
+    color: #768496;
+    font-size: 13px;
+}
+
+.my-listing-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 5px;
+    border-top: 1px solid #e6ebf0;
+}
+
+@media (max-width: 640px) {
+    .my-listings-page {
+        padding: 22px 16px;
+    }
+
+    .my-listings-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .my-listings-heading > .my-listings-primary {
+        width: 100%;
+    }
+
+    .my-listings-summary > div {
+        min-width: 0;
+        flex: 1;
+        padding: 12px;
+    }
+
+    .my-listings-filters {
+        overflow-x: auto;
+    }
+
+    .my-listings-filters button {
+        flex: 0 0 auto;
+        padding: 10px 9px;
+        font-size: 13px;
+    }
+
+    .my-listing-editor {
+        padding: 17px;
+    }
+
+    .my-listing-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .my-listing-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .my-listing-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .my-listing-form-actions button {
+        width: 100%;
+    }
+}

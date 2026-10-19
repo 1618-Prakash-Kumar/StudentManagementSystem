@@ -3,6 +3,8 @@ package com.example.Backend.dto.product;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,6 +25,8 @@ public class ProductResponse {
 
     private String categoryName;
 
+    private Long categoryId;
+
     private String sellerName;
 
     private String sellerEmail;
@@ -34,5 +38,13 @@ public class ProductResponse {
     private String status;
 
     private String productCondition;
+
+    private List<String> imageUrls;
+
+    private String thumbnailUrl;
+
+    private List<ProductImageResponse> images;
+
+    private LocalDateTime createdAt;
 
 }

@@ -1,9 +1,138 @@
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import ChatModal from "./ChatModal";
+import { ImagePlus, MessageCircle, Package, X } from "lucide-react";
 import CartModal from "./CartModal";
 import NotificationModal from "./NotificationModal";
 import "../styles/Home.css";
+import API_BASE_URL from "../api";
+
+function MarketplaceIcon({ name }) {
+    const paths = {
+        search: (
+            <>
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-4-4" />
+            </>
+        ),
+        cart: (
+            <>
+                <path d="M3 3h2l2.2 11.4a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6" />
+                <circle cx="10" cy="20" r="1" />
+                <circle cx="18" cy="20" r="1" />
+            </>
+        ),
+        bell: (
+            <>
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                <path d="M10 21h4" />
+            </>
+        ),
+        shield: (
+            <>
+                <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />
+                <path d="m9 12 2 2 4-4" />
+            </>
+        ),
+        logout: (
+            <>
+                <path d="M10 17l5-5-5-5" />
+                <path d="M15 12H3" />
+                <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+            </>
+        ),
+        plus: (
+            <>
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+            </>
+        ),
+        close: (
+            <>
+                <path d="m18 6-12 12" />
+                <path d="m6 6 12 12" />
+            </>
+        ),
+        image: (
+            <>
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="m21 15-5-5L5 21" />
+            </>
+        ),
+    };
+
+    return (
+        <svg
+            className="marketplace-icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            focusable="false"
+        >
+            {paths[name]}
+        </svg>
+    );
+}
+
+const formatPrice = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+});
+
+const MAX_PRODUCT_IMAGES = 5;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
+
+function SelectedImagePreview({ file, onRemove }) {
+    const [previewUrl, setPreviewUrl] = useState("");
+
+    useEffect(() => {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+    }, [file]);
+
+    return (
+        <div className="listing-image-preview">
+            {previewUrl && <img src={previewUrl} alt={`Preview of ${file.name}`} />}
+            <span title={file.name}>{file.name}</span>
+            <button type="button" onClick={onRemove} aria-label={`Remove ${file.name}`}>
+                <X size={16} />
+            </button>
+        </div>
+    );
+}
+
+function ProductCardImage({ product }) {
+    const [failed, setFailed] = useState(false);
+    const imageUrl = product.thumbnailUrl || product.imageUrls?.[0];
+
+    if (!imageUrl || failed) {
+        return (
+            <div className="product-image-placeholder" role="img" aria-label="No product image available">
+                <MarketplaceIcon name="image" />
+                <span>No image available</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="product-image-placeholder product-image-loaded">
+            <img
+                src={imageUrl}
+                alt={product.title ? `${product.title} listing` : "Product listing"}
+                onError={() => setFailed(true)}
+            />
+        </div>
+    );
+}
 
 function Home() {
     const navigate = useNavigate();
@@ -17,6 +146,7 @@ function Home() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
+    const [appliedSearch, setAppliedSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("ALL");
     const [sortBy, setSortBy] = useState("DEFAULT"); // 'DEFAULT', 'PRICE_ASC', 'PRICE_DESC'
 
@@ -34,9 +164,11 @@ function Home() {
     const [categories, setCategories] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [formMessage, setFormMessage] = useState({ type: "", text: "" });
+    const [selectedImages, setSelectedImages] = useState([]);
+    const [imageValidationError, setImageValidationError] = useState("");
+    const [isImageDragOver, setIsImageDragOver] = useState(false);
 
     // Modals state
-    const [activeChatProduct, setActiveChatProduct] = useState(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
 
@@ -47,10 +179,18 @@ function Home() {
     // Notifications state
     const [notifications, setNotifications] = useState([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+    const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+    const unreadMessageFailures = useRef(0);
+    const nextUnreadMessageRetryAt = useRef(0);
+    const unreadMessageErrorLogged = useRef(false);
 
     // Current user info
     const currentUserEmail = localStorage.getItem("userEmail") || "";
     const userRole = localStorage.getItem("userRole") || "USER";
+    const displayRole = userRole
+        .toLowerCase()
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, (character) => character.toUpperCase());
 
     // Check if redirected from another route requesting sell mode
     useEffect(() => {
@@ -60,7 +200,7 @@ function Home() {
     }, [location.pathname]);
 
     // Fetch products
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async (searchQuery = appliedSearch, signal) => {
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -70,10 +210,12 @@ function Home() {
 
         try {
             setLoading(true);
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/products", {
+            const query = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : "";
+            const response = await fetch(`${API_BASE_URL}/api/products${query}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                signal,
             });
 
             if (!response.ok) {
@@ -82,23 +224,36 @@ function Home() {
                     navigate("/login");
                     return;
                 }
-                throw new Error("Unable to load marketplace listings");
+                let message = "Unable to load marketplace listings";
+                try {
+                    const errorResponse = await response.json();
+                    message = errorResponse.message || message;
+                } catch {
+                    message = response.statusText || message;
+                }
+                throw new Error(message);
             }
 
             const data = await response.json();
-            setProducts(data);
-            setError("");
+            if (!signal?.aborted) {
+                setProducts(data);
+                setError("");
+            }
         } catch (err) {
-            setError(err.message || "Failed to load products");
+            if (err.name !== "AbortError") {
+                setError(err.message || "Failed to load products");
+            }
         } finally {
-            setLoading(false);
+            if (!signal?.aborted) {
+                setLoading(false);
+            }
         }
-    };
+    }, [appliedSearch, navigate]);
 
     // Fetch categories
     const fetchCategories = async () => {
         try {
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/categories");
+            const response = await fetch(`${API_BASE_URL}/api/categories`);
             if (response.ok) {
                 const data = await response.json();
                 setCategories(data);
@@ -117,7 +272,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/cart", {
+            const response = await fetch(`${API_BASE_URL}/api/cart`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -137,7 +292,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/notifications", {
+            const response = await fetch(`${API_BASE_URL}/api/notifications`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -153,19 +308,70 @@ function Home() {
         }
     };
 
+    const fetchUnreadMessages = useCallback(async () => {
+        const token = localStorage.getItem("token");
+        if (!token || Date.now() < nextUnreadMessageRetryAt.current) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/conversations/unread-count`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem("token");
+                    navigate("/login");
+                    return;
+                }
+                const retryDelay = Math.min(30000 * (2 ** unreadMessageFailures.current), 300000);
+                nextUnreadMessageRetryAt.current = Date.now() + retryDelay;
+                unreadMessageFailures.current += 1;
+                if (!unreadMessageErrorLogged.current) {
+                    console.error(
+                        `Unread message count request failed (HTTP ${response.status}); retrying in ${Math.round(retryDelay / 1000)} seconds.`
+                    );
+                    unreadMessageErrorLogged.current = true;
+                }
+                return;
+            }
+            const data = await response.json();
+            setUnreadMessageCount(data.unreadCount || 0);
+            unreadMessageFailures.current = 0;
+            nextUnreadMessageRetryAt.current = 0;
+            unreadMessageErrorLogged.current = false;
+        } catch (err) {
+            const retryDelay = Math.min(30000 * (2 ** unreadMessageFailures.current), 300000);
+            nextUnreadMessageRetryAt.current = Date.now() + retryDelay;
+            unreadMessageFailures.current += 1;
+            if (!unreadMessageErrorLogged.current) {
+                console.error(
+                    `Unread message count request failed; retrying in ${Math.round(retryDelay / 1000)} seconds.`,
+                    err
+                );
+                unreadMessageErrorLogged.current = true;
+            }
+        }
+    }, [navigate]);
+
     useEffect(() => {
-        fetchProducts();
         fetchCategories();
         fetchCart();
         fetchNotifications();
+        fetchUnreadMessages();
 
-        // Polling notifications every 10 seconds
+        // Refresh notification badges periodically while the marketplace is open.
         const interval = setInterval(() => {
             fetchNotifications();
+            fetchUnreadMessages();
         }, 10000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchUnreadMessages]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        fetchProducts(appliedSearch, controller.signal);
+        return () => controller.abort();
+    }, [appliedSearch, fetchProducts]);
 
     // Handle Logout
     const handleLogout = () => {
@@ -173,6 +379,16 @@ function Home() {
         localStorage.removeItem("userEmail");
         localStorage.removeItem("userRole");
         navigate("/login");
+    };
+
+    const openSellerConversation = (product) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            navigate("/login", { state: { from: `/messages?productId=${product.id}` } });
+            return;
+        }
+
+        navigate(`/messages?productId=${product.id}`);
     };
 
     // Handle Add to Cart
@@ -186,7 +402,7 @@ function Home() {
         const qtyToAdd = cartAddQuantities[product.id] || 1;
 
         try {
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/cart/items", {
+            const response = await fetch(`${API_BASE_URL}/api/cart/items`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -207,7 +423,7 @@ function Home() {
             setCart(updatedCart);
 
             // Show Toast
-            setCartToast(`✅ Added ${qtyToAdd} unit(s) of "${product.title}" to cart. Seller notified! 🔔`);
+            setCartToast(`Added ${qtyToAdd} unit(s) of "${product.title}" to cart. Seller notified.`);
             setTimeout(() => setCartToast(""), 3500);
 
             // Refresh notifications for seller view
@@ -223,7 +439,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/cart/items/${cartItemId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/cart/items/${cartItemId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -250,7 +466,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/cart/items/${cartItemId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/cart/items/${cartItemId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -272,7 +488,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/cart", {
+            const response = await fetch(`${API_BASE_URL}/api/cart`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -293,7 +509,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/notifications/${notifId}/read`, {
+            const response = await fetch(`${API_BASE_URL}/api/notifications/${notifId}/read`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -313,7 +529,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/notifications/read-all", {
+            const response = await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -345,26 +561,47 @@ function Home() {
 
         try {
             setSubmitting(true);
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/products", {
+            const requestBody = {
+                title,
+                description,
+                price: Number(price),
+                quantity: Number(quantity),
+                status,
+                categoryId: Number(categoryId),
+                productCondition: condition,
+            };
+            let requestBodyContent;
+            if (selectedImages.length > 0) {
+                const formData = new FormData();
+                formData.append(
+                    "product",
+                    new Blob([JSON.stringify(requestBody)], { type: "application/json" })
+                );
+                selectedImages.forEach((image) => formData.append("images", image));
+                requestBodyContent = formData;
+            } else {
+                requestBodyContent = new Blob(
+                    [JSON.stringify(requestBody)],
+                    { type: "application/json" }
+                );
+            }
+            const response = await fetch(`${API_BASE_URL}/api/products`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    title,
-                    description,
-                    price: Number(price),
-                    quantity: Number(quantity),
-                    status,
-                    categoryId: Number(categoryId),
-                    productCondition: condition,
-                }),
+                body: requestBodyContent,
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(errorData || "Failed to list the product");
+                let errorMessage = "Failed to list the product";
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch {
+                    errorMessage = response.statusText || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
 
             // Reset form
@@ -374,6 +611,8 @@ function Home() {
             setQuantity("1");
             setStatus("AVAILABLE");
             setCondition("GOOD");
+            setSelectedImages([]);
+            setImageValidationError("");
             setFormMessage({ type: "success", text: "Product listed successfully! Switching to BUY view..." });
 
             // Refresh products
@@ -391,20 +630,37 @@ function Home() {
         }
     };
 
+    const addSelectedImages = (files) => {
+        setImageValidationError("");
+        const nextImages = selectedImages.slice();
+        const errors = [];
+
+        Array.from(files).forEach((file) => {
+            if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+                errors.push(`${file.name}: choose a JPEG or PNG image.`);
+            } else if (file.size > MAX_IMAGE_SIZE) {
+                errors.push(`${file.name}: image must be 5 MB or smaller.`);
+            } else if (nextImages.length >= MAX_PRODUCT_IMAGES) {
+                errors.push(`A listing can include up to ${MAX_PRODUCT_IMAGES} images.`);
+            } else if (!nextImages.some((selected) =>
+                selected.name === file.name && selected.size === file.size
+                    && selected.lastModified === file.lastModified)) {
+                nextImages.push(file);
+            }
+        });
+
+        setSelectedImages(nextImages);
+        if (errors.length) setImageValidationError(errors.join(" "));
+    };
+
     // Filter and Sort products
     const processedProducts = useMemo(() => {
         let list = products.filter((item) => {
             const matchesCategory =
                 selectedCategory === "ALL" ||
-                (item.categoryName && item.categoryName.toLowerCase() === selectedCategory.toLowerCase());
+                (item.categoryName && item.categoryName.trim().toLowerCase() === selectedCategory.trim().toLowerCase());
 
-            const matchesSearch =
-                !searchTerm ||
-                item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.sellerName?.toLowerCase().includes(searchTerm.toLowerCase());
-
-            return matchesCategory && matchesSearch;
+            return matchesCategory;
         });
 
         if (sortBy === "PRICE_ASC") {
@@ -414,7 +670,7 @@ function Home() {
         }
 
         return list;
-    }, [products, selectedCategory, searchTerm, sortBy]);
+    }, [products, selectedCategory, sortBy]);
 
     return (
         <div className="marketplace-container">
@@ -428,61 +684,108 @@ function Home() {
             {/* Top Navigation Bar */}
             <header className="marketplace-navbar">
                 <div className="navbar-left">
-                    <div className="brand-logo" onClick={() => setActiveTab("BUY")}>
-                        <span className="brand-icon">🎓</span>
-                        <div className="brand-text">
+                    <button type="button" className="brand-logo" onClick={() => setActiveTab("BUY")} aria-label="College Exchange home">
+                        <span className="brand-mark" aria-hidden="true">CE</span>
+                        <span className="brand-text">
                             <span className="brand-title">College Exchange</span>
-                            <span className="brand-tagline">Campus Student Marketplace</span>
-                        </div>
-                    </div>
+                        </span>
+                    </button>
 
-                    {/* OLX-Style BUY & SELL Mode Switcher */}
-                    <div className="mode-tabs">
+                    <nav className="mode-tabs" aria-label="Marketplace">
                         <button
                             type="button"
                             className={`tab-btn ${activeTab === "BUY" ? "active-buy" : ""}`}
                             onClick={() => setActiveTab("BUY")}
+                            aria-current={activeTab === "BUY" ? "page" : undefined}
                         >
-                            🛍️ BUY <span className="tab-pill">Explore</span>
+                            Browse
                         </button>
 
                         <button
                             type="button"
                             className={`tab-btn sell-tab-btn ${activeTab === "SELL" ? "active-sell" : ""}`}
                             onClick={() => setActiveTab("SELL")}
+                            aria-current={activeTab === "SELL" ? "page" : undefined}
                         >
-                            ➕ SELL <span className="tab-pill-sell">List Item</span>
+                            Sell
                         </button>
-                    </div>
+                    </nav>
                 </div>
 
-                {/* Search Bar in Navbar */}
                 {activeTab === "BUY" && (
-                    <div className="navbar-search">
-                        <span className="search-icon">🔍</span>
+                    <form
+                        className="navbar-search"
+                        role="search"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            setAppliedSearch(searchTerm.trim());
+                        }}
+                    >
+                        <MarketplaceIcon name="search" />
                         <input
+                            aria-label="Search marketplace listings"
                             type="text"
-                            placeholder="Find books, cycles, calculators, hostel items..."
+                            placeholder="Search books, electronics, cycles..."
+                            maxLength={100}
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(event) => {
+                                setSearchTerm(event.target.value);
+                                if (!event.target.value) setAppliedSearch("");
+                            }}
                         />
-                        {searchTerm && (
-                            <button className="clear-search" onClick={() => setSearchTerm("")}>
-                                ✕
+                        {(searchTerm || appliedSearch) && (
+                            <button
+                                type="button"
+                                className="clear-search"
+                                onClick={() => {
+                                    setSearchTerm("");
+                                    setAppliedSearch("");
+                                }}
+                                aria-label="Clear search"
+                            >
+                                <MarketplaceIcon name="close" />
                             </button>
                         )}
-                    </div>
+                        <button type="submit" className="search-submit-btn" aria-label="Search listings">
+                            Search
+                        </button>
+                    </form>
                 )}
 
-                <div className="navbar-right">
-                    {/* Cart Button with Count Badge */}
+                <nav className="navbar-right" aria-label="Account and marketplace actions">
+                    <button
+                        type="button"
+                        className="nav-messages-btn"
+                        onClick={() => navigate("/messages")}
+                        aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
+                    >
+                        <MessageCircle size={18} aria-hidden="true" />
+                        <span>Messages</span>
+                        {unreadMessageCount > 0 && (
+                            <span className="message-badge-count">
+                                {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
+                            </span>
+                        )}
+                    </button>
+
+                    <button
+                        type="button"
+                        className="nav-messages-btn nav-my-listings-btn"
+                        onClick={() => navigate("/my-listings")}
+                        aria-label="Open My Listings"
+                    >
+                        <Package size={18} aria-hidden="true" />
+                        <span>My Listings</span>
+                    </button>
+
                     <button
                         type="button"
                         className="nav-cart-btn"
                         onClick={() => setIsCartOpen(true)}
-                        title="View My Cart"
+                        aria-label={`Cart${cart.totalItems > 0 ? `, ${cart.totalItems} items` : ""}`}
                     >
-                        🛒 Cart
+                        <MarketplaceIcon name="cart" />
+                        <span>Cart</span>
                         {cart.totalItems > 0 && (
                             <span className="cart-badge-count">{cart.totalItems}</span>
                         )}
@@ -493,9 +796,10 @@ function Home() {
                         type="button"
                         className={`nav-notif-btn ${unreadNotifCount > 0 ? "has-unread" : ""}`}
                         onClick={() => setIsNotifOpen(true)}
-                        title="View Seller Notifications"
+                        aria-label={`Notifications${unreadNotifCount > 0 ? `, ${unreadNotifCount} unread` : ""}`}
                     >
-                        🔔 Alerts
+                        <MarketplaceIcon name="bell" />
+                        <span>Alerts</span>
                         {unreadNotifCount > 0 && (
                             <span className="notif-badge-count">{unreadNotifCount}</span>
                         )}
@@ -507,9 +811,10 @@ function Home() {
                             type="button"
                             className="nav-admin-btn"
                             onClick={() => navigate("/admin")}
-                            title="Open Admin Control Panel"
+                            aria-label="Open admin panel"
                         >
-                            🛡️ Admin Panel
+                            <MarketplaceIcon name="shield" />
+                            <span>Admin</span>
                         </button>
                     )}
 
@@ -518,17 +823,18 @@ function Home() {
                             {(currentUserEmail || "U").charAt(0).toUpperCase()}
                         </span>
                         <div className="user-info-text">
-                            <span className="user-email">{currentUserEmail || "Student User"}</span>
+                            <span className="user-email">{currentUserEmail || "Account"}</span>
                             <span className="user-role-badge">
-                                {userRole === "ADMIN" ? "👑 Admin" : (activeTab === "BUY" ? "👤 Buyer Mode" : "🏷️ Seller Mode")}
+                                {displayRole}
                             </span>
                         </div>
                     </div>
 
-                    <button type="button" className="nav-logout-btn" onClick={handleLogout} title="Logout">
-                        Logout 🚪
+                    <button type="button" className="nav-logout-btn" onClick={handleLogout}>
+                        <MarketplaceIcon name="logout" />
+                        <span>Log out</span>
                     </button>
-                </div>
+                </nav>
             </header>
 
             {/* Main Content Area */}
@@ -549,7 +855,8 @@ function Home() {
                                 className="banner-sell-cta"
                                 onClick={() => setActiveTab("SELL")}
                             >
-                                Have something to sell? <strong>+ List Product</strong>
+                                <MarketplaceIcon name="plus" />
+                                <span>Sell an item</span>
                             </button>
                         </div>
 
@@ -578,16 +885,16 @@ function Home() {
 
                             {/* Price Sorting Selector */}
                             <div className="price-sort-control">
-                                <label htmlFor="price-sort-select">📊 Sort By:</label>
+                                <label htmlFor="price-sort-select">Sort by</label>
                                 <select
                                     id="price-sort-select"
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
                                     className="price-sort-dropdown"
                                 >
-                                    <option value="DEFAULT">✨ Newest First</option>
-                                    <option value="PRICE_ASC">💵 Price: Low to High (Increasing ↑)</option>
-                                    <option value="PRICE_DESC">💰 Price: High to Low (Decreasing ↓)</option>
+                                    <option value="DEFAULT">Newest first</option>
+                                    <option value="PRICE_ASC">Price: low to high</option>
+                                    <option value="PRICE_DESC">Price: high to low</option>
                                 </select>
                             </div>
                         </div>
@@ -610,10 +917,10 @@ function Home() {
                         {/* Empty States */}
                         {!loading && !error && processedProducts.length === 0 && (
                             <div className="empty-marketplace-box">
-                                <h3>No listings found</h3>
+                                <h3>{appliedSearch ? "No products found" : "No listings found"}</h3>
                                 <p>
-                                    {searchTerm || selectedCategory !== "ALL"
-                                        ? "Try adjusting your search keyword or selected category filter."
+                                    {appliedSearch || selectedCategory !== "ALL"
+                                        ? "Try another keyword or adjust the selected category filter."
                                         : "Be the first to list a product in your college community!"}
                                 </p>
                                 <button
@@ -643,53 +950,40 @@ function Home() {
                                     const maxAvailableQty = product.quantity || 1;
 
                                     return (
-                                        <article className="olx-product-card" key={product.id}>
-                                            <div className="card-top-tags">
-                                                <span className="category-tag">
-                                                    📁 {product.categoryName || "General"}
-                                                </span>
-                                                <span className={`condition-tag condition-${(product.productCondition || "GOOD").toLowerCase()}`}>
-                                                    ✨ {product.productCondition || "GOOD"}
-                                                </span>
-                                            </div>
+                                        <article className="product-card" key={product.id}>
+                                            <ProductCardImage product={product} />
 
-                                            <div className="card-body">
-                                                <div className="card-price-row">
-                                                    <span className="product-price">₹{product.price}</span>
-                                                    {/* Product Availability & Stock Pill */}
-                                                    {isAvailable && (
-                                                        <span className="status-badge-available">
-                                                            ✅ In Stock ({product.quantity})
-                                                        </span>
-                                                    )}
-                                                    {isAvailableSoon && (
-                                                        <span className="status-badge-soon">
-                                                            ⏳ Available Soon
-                                                        </span>
-                                                    )}
-                                                    {isNotAvailable && (
-                                                        <span className="status-badge-out">
-                                                            🚫 Out of Stock
-                                                        </span>
-                                                    )}
+                                            <div className="product-card-content">
+                                                <div className="product-card-heading">
+                                                    <span className="product-price">
+                                                        {formatPrice.format(Number(product.price))}
+                                                    </span>
+                                                    <h3 className="product-title">{product.title}</h3>
                                                 </div>
 
-                                                <h3 className="product-title">{product.title}</h3>
-                                                <p className="product-desc">
-                                                    {product.description || "No additional description provided."}
+                                                <div className="product-meta">
+                                                    <span>{product.categoryName || "General"}</span>
+                                                    <span>{(product.productCondition || "GOOD").replaceAll("_", " ")}</span>
+                                                </div>
+                                                <p className={`product-availability ${isAvailable ? "in-stock" : ""}`}>
+                                                    {isAvailable
+                                                        ? `${product.quantity} available`
+                                                        : isAvailableSoon
+                                                            ? "Available soon"
+                                                            : isNotAvailable
+                                                                ? "Out of stock"
+                                                                : product.status}
                                                 </p>
+                                                {product.description && (
+                                                    <p className="product-desc">{product.description}</p>
+                                                )}
                                             </div>
 
-                                            {/* Seller Contact & Details Section */}
                                             <div className="card-seller-section">
                                                 <div className="seller-meta">
-                                                    <span className="seller-avatar-small">
-                                                        {(product.sellerName || "S").charAt(0).toUpperCase()}
-                                                    </span>
                                                     <div className="seller-text">
-                                                        <span className="seller-label">Seller</span>
                                                         <span className="seller-name">
-                                                            {product.sellerName || "Student Seller"}
+                                                            {product.sellerName || "Seller"}
                                                             {isOwnProduct && <span className="you-badge"> (You)</span>}
                                                         </span>
                                                     </div>
@@ -698,7 +992,6 @@ function Home() {
                                                 <div className="seller-contact-details">
                                                     {product.sellerPhone && (
                                                         <div className="contact-line">
-                                                            <span>📞</span>
                                                             <a href={`tel:${product.sellerPhone}`}>
                                                                 {product.sellerPhone}
                                                             </a>
@@ -706,7 +999,6 @@ function Home() {
                                                     )}
                                                     {product.sellerEmail && (
                                                         <div className="contact-line">
-                                                            <span>✉️</span>
                                                             <a href={`mailto:${product.sellerEmail}`}>
                                                                 {product.sellerEmail}
                                                             </a>
@@ -744,29 +1036,31 @@ function Home() {
                                                             className="add-to-cart-btn"
                                                             onClick={() => handleAddToCart(product)}
                                                         >
-                                                            🛒 Add to Cart
+                                                            Add to cart
                                                         </button>
                                                     </div>
                                                 ) : isAvailableSoon ? (
                                                     <button type="button" className="cart-disabled-btn soon" disabled>
-                                                        ⏳ Available Soon (Cannot Add)
+                                                        Available soon
                                                     </button>
                                                 ) : (
                                                     <button type="button" className="cart-disabled-btn out" disabled>
-                                                        🚫 Out of Stock (Unavailable)
+                                                        Out of stock
                                                     </button>
                                                 )}
                                             </div>
 
                                             {/* Card Action Buttons: Chat & WhatsApp */}
                                             <div className="card-actions">
-                                                <button
-                                                    type="button"
-                                                    className="chat-action-btn"
-                                                    onClick={() => setActiveChatProduct(product)}
-                                                >
-                                                    💬 Chat with Seller
-                                                </button>
+                                                {!isOwnProduct && (
+                                                    <button
+                                                        type="button"
+                                                        className="chat-action-btn"
+                                                        onClick={() => openSellerConversation(product)}
+                                                    >
+                                                        Message seller
+                                                    </button>
+                                                )}
 
                                                 {product.sellerPhone && (
                                                     <a
@@ -774,9 +1068,9 @@ function Home() {
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="whatsapp-action-btn"
-                                                        title="Contact on WhatsApp / Call"
+                                                        aria-label={`Contact ${product.sellerName || "seller"} on WhatsApp`}
                                                     >
-                                                        📲 WhatsApp
+                                                        WhatsApp
                                                     </a>
                                                 )}
                                             </div>
@@ -816,6 +1110,57 @@ function Home() {
                             )}
 
                             <form onSubmit={handleCreateListing} className="seller-listing-form">
+                                <section className="listing-image-section" aria-labelledby="listing-image-heading">
+                                    <div className="listing-image-section-heading">
+                                        <h3 id="listing-image-heading">Product photos</h3>
+                                        <span>Optional · up to {MAX_PRODUCT_IMAGES} images</span>
+                                    </div>
+                                    <label
+                                        className={`listing-image-dropzone ${isImageDragOver ? "is-drag-over" : ""}`}
+                                        onDragOver={(event) => {
+                                            event.preventDefault();
+                                            setIsImageDragOver(true);
+                                        }}
+                                        onDragLeave={(event) => {
+                                            event.preventDefault();
+                                            setIsImageDragOver(false);
+                                        }}
+                                        onDrop={(event) => {
+                                            event.preventDefault();
+                                            setIsImageDragOver(false);
+                                            addSelectedImages(event.dataTransfer.files);
+                                        }}
+                                    >
+                                        <ImagePlus size={25} aria-hidden="true" />
+                                        <span className="listing-image-dropzone-title">Choose or drop product photos</span>
+                                        <span className="listing-image-dropzone-hint">JPEG or PNG · up to 5 MB each · maximum 5 images</span>
+                                        <input
+                                            type="file"
+                                            accept="image/jpeg,image/png"
+                                            multiple
+                                            onChange={(event) => {
+                                                addSelectedImages(event.target.files);
+                                                event.target.value = "";
+                                            }}
+                                        />
+                                    </label>
+                                    {imageValidationError && (
+                                        <p className="listing-image-error" role="alert">{imageValidationError}</p>
+                                    )}
+                                    {selectedImages.length > 0 && (
+                                        <div className="listing-image-previews">
+                                            {selectedImages.map((file, index) => (
+                                                <SelectedImagePreview
+                                                    key={`${file.name}-${file.lastModified}-${index}`}
+                                                    file={file}
+                                                    onRemove={() => setSelectedImages((current) =>
+                                                        current.filter((_, imageIndex) => imageIndex !== index))}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </section>
+
                                 <div className="form-group">
                                     <label htmlFor="product-title">
                                         Product Title <span className="required-star">*</span>
@@ -949,7 +1294,7 @@ function Home() {
                                         className="submit-listing-btn"
                                         disabled={submitting}
                                     >
-                                        {submitting ? "Publishing Listing..." : "🚀 Publish Product to BUY Page"}
+                                        {submitting ? "Publishing listing and photos..." : "🚀 Publish Product to BUY Page"}
                                     </button>
                                     <button
                                         type="button"
@@ -964,15 +1309,6 @@ function Home() {
                     </section>
                 )}
             </main>
-
-            {/* Interactive Chat with Seller Modal */}
-            {activeChatProduct && (
-                <ChatModal
-                    product={activeChatProduct}
-                    currentUserEmail={currentUserEmail}
-                    onClose={() => setActiveChatProduct(null)}
-                />
-            )}
 
             {/* Cart Drawer / Modal */}
             {isCartOpen && (

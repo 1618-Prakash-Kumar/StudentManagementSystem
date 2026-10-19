@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 
 function LoginForm() {
@@ -9,6 +9,7 @@ function LoginForm() {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,7 +37,10 @@ function LoginForm() {
                 localStorage.setItem("userEmail", email);
                 localStorage.setItem("userRole", result.role || "USER");
 
-                if (result.role === "ADMIN") {
+                const requestedDestination = location.state?.from;
+                if (requestedDestination) {
+                    navigate(requestedDestination, { replace: true });
+                } else if (result.role === "ADMIN") {
                     navigate("/admin");
                 } else {
                     navigate("/home");

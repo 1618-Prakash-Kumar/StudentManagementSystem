@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/CreateProduct.css";
+import API_BASE_URL from "../api";
 
 function CreateProduct() {
     const [title, setTitle] = useState("");
@@ -17,7 +18,7 @@ function CreateProduct() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch("https://collegeexchange-backend.onrender.com/api/categories");
+                const response = await fetch(`${API_BASE_URL}/api/categories`);
 
                 if (!response.ok) {
                     throw new Error("Unable to load categories");
@@ -58,7 +59,7 @@ function CreateProduct() {
         try {
             setSubmitting(true);
 
-            const response = await fetch("https://collegeexchange-backend.onrender.com/api/products", {
+            const response = await fetch(`${API_BASE_URL}/api/products`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -73,12 +74,18 @@ function CreateProduct() {
                 }),
             });
 
-            if (!response.ok) {
-                const message = await response.text();
-                throw new Error(message || "Unable to create listing");
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem("token");
+                navigate("/login", { state: { from: "/create-product" } });
+                return;
             }
 
-            navigate("/home");
+            if (!response.ok) {
+                const result = await response.json().catch(() => null);
+                throw new Error(result?.message || "Unable to create listing");
+            }
+
+            navigate("/my-listings", { state: { notice: "Your listing was published successfully." } });
         } catch (err) {
             setError(err.message);
         } finally {
@@ -97,6 +104,9 @@ function CreateProduct() {
 
                     <button type="button" className="secondary-button" onClick={() => navigate("/home")}>
                         ← Back to Buy Page
+                    </button>
+                    <button type="button" className="secondary-button" onClick={() => navigate("/my-listings")}>
+                        My Listings
                     </button>
                 </div>
 

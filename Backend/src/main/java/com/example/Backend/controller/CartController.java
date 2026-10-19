@@ -26,7 +26,7 @@ public class CartController {
         return ResponseEntity.ok(cartService.addToCart(request, email));
     }
 
-    @GetMapping
+    @GetMapping({"", "/items"})
     public ResponseEntity<CartSummaryResponse> getCart(Authentication authentication) {
         String email = authentication.getName();
         return ResponseEntity.ok(cartService.getCart(email));

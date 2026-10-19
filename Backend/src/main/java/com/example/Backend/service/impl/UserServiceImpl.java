@@ -8,6 +8,10 @@ import com.example.Backend.exception.BadRequestException;
 import com.example.Backend.exception.DuplicateResourceException;
 import com.example.Backend.exception.ResourceNotFoundException;
 import com.example.Backend.repository.UserRepository;
+import com.example.Backend.repository.ConversationRepository;
+import com.example.Backend.repository.MessageRepository;
+import com.example.Backend.entity.ProductImage;
+import com.example.Backend.service.storage.ImageStorageService;
 import com.example.Backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -22,6 +26,15 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ConversationRepository conversationRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
+
+    @Autowired
+    private ImageStorageService imageStorageService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -87,6 +100,13 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("You cannot delete your own account from the Admin Panel.");
         }
 
+        messageRepository.deleteForConversationParticipant(user.getId());
+        conversationRepository.deleteForParticipant(user.getId());
+        user.getProducts().stream()
+                .flatMap(product -> product.getImages().stream())
+                .map(ProductImage::getStorageKey)
+                .filter(storageKey -> storageKey != null && !storageKey.isBlank())
+                .forEach(imageStorageService::delete);
         userRepository.delete(user);
     }
 

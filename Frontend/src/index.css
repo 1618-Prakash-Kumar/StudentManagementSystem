@@ -109,3 +109,57 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+:root {
+  --color-page: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-text: #202833;
+  --color-muted: #687482;
+  --color-border: #e2e6eb;
+  --color-primary: #2859a8;
+  --color-primary-hover: #1f4788;
+  --font-sans: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  font: 15px/1.5 var(--font-sans);
+  letter-spacing: normal;
+  color: var(--color-text);
+  color-scheme: light;
+  background: var(--color-page);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-page);
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  border: 0;
+  text-align: left;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgb(40 89 168 / 35%);
+  outline-offset: 2px;
+}
