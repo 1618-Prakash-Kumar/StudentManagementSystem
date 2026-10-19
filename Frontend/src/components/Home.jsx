@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ImagePlus, Menu, MessageCircle, Package, X } from "lucide-react";
+import { ImagePlus, LogIn, Menu, MessageCircle, Package, UserPlus, X } from "lucide-react";
 import CartModal from "./CartModal";
 import NotificationModal from "./NotificationModal";
 import "../styles/Home.css";
@@ -139,8 +139,15 @@ function Home() {
     const location = useLocation();
 
     // Mode state: 'BUY' (default) or 'SELL'
-    const [activeTab, setActiveTab] = useState("BUY");
+    const [activeTab, setActiveTab] = useState(
+        location.pathname === "/create-product" ? "SELL" : "BUY"
+    );
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+    const navbarRef = useRef(null);
+    const searchInputRef = useRef(null);
+    const searchToggleRef = useRef(null);
+    const wasMobileSearchOpen = useRef(false);
 
     // Product state
     const [products, setProducts] = useState([]);
@@ -187,25 +194,72 @@ function Home() {
 
     // Current user info
     const currentUserEmail = localStorage.getItem("userEmail") || "";
+    const isAuthenticated = Boolean(localStorage.getItem("token"));
     const userRole = localStorage.getItem("userRole") || "USER";
     const displayRole = userRole
         .toLowerCase()
         .replaceAll("_", " ")
         .replace(/\b\w/g, (character) => character.toUpperCase());
 
-    // Check if redirected from another route requesting sell mode
     useEffect(() => {
-        if (location.pathname === "/create-product") {
-            setActiveTab("SELL");
-        }
+        setActiveTab(location.pathname === "/create-product" ? "SELL" : "BUY");
     }, [location.pathname]);
+
+    const changeMode = (mode) => {
+        setActiveTab(mode);
+        setMobileMenuOpen(false);
+        navigate(mode === "SELL" ? "/create-product" : "/home");
+    };
+
+    useEffect(() => {
+        if (!mobileMenuOpen) return undefined;
+
+        const handlePointerDown = (event) => {
+            if (!navbarRef.current?.contains(event.target)) {
+                setMobileMenuOpen(false);
+            }
+        };
+        const handleKeyDown = (event) => {
+            if (event.key === "Escape") setMobileMenuOpen(false);
+        };
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [mobileMenuOpen]);
+
+    useEffect(() => {
+        if (mobileSearchOpen) {
+            wasMobileSearchOpen.current = true;
+            searchInputRef.current?.focus();
+        } else if (wasMobileSearchOpen.current) {
+            wasMobileSearchOpen.current = false;
+            searchToggleRef.current?.focus();
+        }
+    }, [mobileSearchOpen]);
+
+    useEffect(() => {
+        if (!mobileSearchOpen) return undefined;
+
+        const closeSearchOnEscape = (event) => {
+            if (event.key === "Escape") {
+                setMobileSearchOpen(false);
+            }
+        };
+
+        document.addEventListener("keydown", closeSearchOnEscape);
+        return () => document.removeEventListener("keydown", closeSearchOnEscape);
+    }, [mobileSearchOpen]);
 
     // Fetch products
     const fetchProducts = useCallback(async (searchQuery = appliedSearch, signal) => {
         const token = localStorage.getItem("token");
 
         if (!token) {
-            navigate("/login");
+            navigate("/login", { state: { from: location.pathname } });
             return;
         }
 
@@ -222,7 +276,7 @@ function Home() {
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
                     localStorage.removeItem("token");
-                    navigate("/login");
+                    navigate("/login", { state: { from: location.pathname } });
                     return;
                 }
                 let message = "Unable to load marketplace listings";
@@ -249,7 +303,7 @@ function Home() {
                 setLoading(false);
             }
         }
-    }, [appliedSearch, navigate]);
+    }, [appliedSearch, location.pathname, navigate]);
 
     // Fetch categories
     const fetchCategories = async () => {
@@ -621,7 +675,7 @@ function Home() {
 
             // Switch to BUY tab after short delay
             setTimeout(() => {
-                setActiveTab("BUY");
+                changeMode("BUY");
                 setFormMessage({ type: "", text: "" });
             }, 900);
         } catch (err) {
@@ -683,49 +737,57 @@ function Home() {
             )}
 
             {/* Top Navigation Bar */}
-            <header className="marketplace-navbar">
+            <header className="marketplace-navbar" ref={navbarRef}>
                 <div className="navbar-left">
-                    <button type="button" className="brand-logo" onClick={() => setActiveTab("BUY")} aria-label="College Exchange home">
+                    <button
+                        type="button"
+                        className="brand-logo"
+                        onClick={() => changeMode("BUY")}
+                        aria-label="College Exchange home"
+                    >
                         <span className="brand-mark" aria-hidden="true">CE</span>
                         <span className="brand-text">
                             <span className="brand-title">College Exchange</span>
                         </span>
                     </button>
-
-                    <nav className="mode-tabs desktop-mode-tabs" aria-label="Marketplace">
-                        <button
-                            type="button"
-                            className={`tab-btn ${activeTab === "BUY" ? "active-buy" : ""}`}
-                            onClick={() => setActiveTab("BUY")}
-                            aria-current={activeTab === "BUY" ? "page" : undefined}
-                        >
-                            Browse
-                        </button>
-                        <button
-                            type="button"
-                            className={`tab-btn sell-tab-btn ${activeTab === "SELL" ? "active-sell" : ""}`}
-                            onClick={() => setActiveTab("SELL")}
-                            aria-current={activeTab === "SELL" ? "page" : undefined}
-                        >
-                            Sell
-                        </button>
-                    </nav>
-
-                    <button
-                        type="button"
-                        className="mobile-menu-toggle"
-                        aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-                        aria-expanded={mobileMenuOpen}
-                        aria-controls="marketplace-navigation"
-                        onClick={() => setMobileMenuOpen((open) => !open)}
-                    >
-                        {mobileMenuOpen ? <X size={21} aria-hidden="true" /> : <Menu size={21} aria-hidden="true" />}
-                    </button>
                 </div>
 
-                {activeTab === "BUY" && (
+                <nav className="mode-tabs" role="group" aria-label="Marketplace mode">
+                    <button
+                        type="button"
+                        className={`tab-btn ${activeTab === "BUY" ? "active-buy" : ""}`}
+                        onClick={() => changeMode("BUY")}
+                        aria-pressed={activeTab === "BUY"}
+                    >
+                        BUY
+                    </button>
+                    <button
+                        type="button"
+                        className={`tab-btn sell-tab-btn ${activeTab === "SELL" ? "active-sell" : ""}`}
+                        onClick={() => changeMode("SELL")}
+                        aria-pressed={activeTab === "SELL"}
+                    >
+                        SELL
+                    </button>
+                </nav>
+
+                <div className="navbar-tools">
+                <div className={`navbar-search ${mobileSearchOpen ? "is-expanded" : ""}`}>
+                    <button
+                        type="button"
+                        className="mobile-search-toggle"
+                        ref={searchToggleRef}
+                        onClick={() => {
+                            setSearchTerm((term) => term || appliedSearch);
+                            setMobileSearchOpen(true);
+                        }}
+                        aria-label="Open marketplace search"
+                        aria-expanded={mobileSearchOpen}
+                    >
+                        <MarketplaceIcon name="search" />
+                    </button>
                     <form
-                        className="navbar-search"
+                        className="navbar-search-form"
                         role="search"
                         onSubmit={(event) => {
                             event.preventDefault();
@@ -735,6 +797,7 @@ function Home() {
                         <MarketplaceIcon name="search" />
                         <input
                             aria-label="Search marketplace listings"
+                            ref={searchInputRef}
                             type="text"
                             placeholder="Search books, electronics, cycles..."
                             maxLength={100}
@@ -758,146 +821,172 @@ function Home() {
                             </button>
                         )}
                         <button type="submit" className="search-submit-btn" aria-label="Search listings">
-                            Search
+                            <MarketplaceIcon name="search" />
+                            <span>Search</span>
+                        </button>
+                        <button
+                            type="button"
+                            className="mobile-search-close"
+                            onClick={() => setMobileSearchOpen(false)}
+                            aria-label="Close search"
+                        >
+                            <X size={18} aria-hidden="true" />
                         </button>
                     </form>
-                )}
+                </div>
+
+                <button
+                    type="button"
+                    className="mobile-menu-toggle"
+                    aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                    aria-expanded={mobileMenuOpen}
+                    aria-controls="marketplace-navigation"
+                    onClick={() => setMobileMenuOpen((open) => !open)}
+                >
+                    {mobileMenuOpen ? <X size={21} aria-hidden="true" /> : <Menu size={21} aria-hidden="true" />}
+                </button>
 
                 <nav
                     id="marketplace-navigation"
                     className={`navbar-right ${mobileMenuOpen ? "is-open" : ""}`}
                     aria-label="Account and marketplace actions"
                 >
-                    <div className="mode-tabs mobile-mode-tabs" role="group" aria-label="Marketplace">
-                        <button
-                            type="button"
-                            className={`tab-btn ${activeTab === "BUY" ? "active-buy" : ""}`}
-                            onClick={() => {
-                                setActiveTab("BUY");
-                                setMobileMenuOpen(false);
-                            }}
-                            aria-current={activeTab === "BUY" ? "page" : undefined}
-                        >
-                            Browse
-                        </button>
+                    {isAuthenticated ? (
+                        <>
+                            <div className="navbar-action-group">
+                                <button
+                                    type="button"
+                                    className="nav-messages-btn"
+                                    onClick={() => {
+                                        navigate("/messages");
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
+                                >
+                                    <MessageCircle size={18} aria-hidden="true" />
+                                    <span>Messages</span>
+                                    {unreadMessageCount > 0 && (
+                                        <span className="message-badge-count">
+                                            {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
+                                        </span>
+                                    )}
+                                </button>
 
-                        <button
-                            type="button"
-                            className={`tab-btn sell-tab-btn ${activeTab === "SELL" ? "active-sell" : ""}`}
-                            onClick={() => {
-                                setActiveTab("SELL");
-                                setMobileMenuOpen(false);
-                            }}
-                            aria-current={activeTab === "SELL" ? "page" : undefined}
-                        >
-                            Sell
-                        </button>
-                    </div>
+                                <button
+                                    type="button"
+                                    className="nav-messages-btn nav-my-listings-btn"
+                                    onClick={() => {
+                                        navigate("/my-listings");
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    aria-label="Open My Listings"
+                                >
+                                    <Package size={18} aria-hidden="true" />
+                                    <span>My Listings</span>
+                                </button>
 
-                    <button
-                        type="button"
-                        className="nav-messages-btn"
-                        onClick={() => {
-                            navigate("/messages");
-                            setMobileMenuOpen(false);
-                        }}
-                        aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
-                    >
-                        <MessageCircle size={18} aria-hidden="true" />
-                        <span>Messages</span>
-                        {unreadMessageCount > 0 && (
-                            <span className="message-badge-count">
-                                {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
-                            </span>
-                        )}
-                    </button>
+                                <button
+                                    type="button"
+                                    className="nav-cart-btn"
+                                    onClick={() => {
+                                        setIsCartOpen(true);
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    aria-label={`Cart${cart.totalItems > 0 ? `, ${cart.totalItems} items` : ""}`}
+                                >
+                                    <MarketplaceIcon name="cart" />
+                                    <span>Cart</span>
+                                    {cart.totalItems > 0 && (
+                                        <span className="cart-badge-count">{cart.totalItems}</span>
+                                    )}
+                                </button>
 
-                    <button
-                        type="button"
-                        className="nav-messages-btn nav-my-listings-btn"
-                        onClick={() => {
-                            navigate("/my-listings");
-                            setMobileMenuOpen(false);
-                        }}
-                        aria-label="Open My Listings"
-                    >
-                        <Package size={18} aria-hidden="true" />
-                        <span>My Listings</span>
-                    </button>
+                                <button
+                                    type="button"
+                                    className={`nav-notif-btn ${unreadNotifCount > 0 ? "has-unread" : ""}`}
+                                    onClick={() => {
+                                        setIsNotifOpen(true);
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    aria-label={`Notifications${unreadNotifCount > 0 ? `, ${unreadNotifCount} unread` : ""}`}
+                                >
+                                    <MarketplaceIcon name="bell" />
+                                    <span>Alerts</span>
+                                    {unreadNotifCount > 0 && (
+                                        <span className="notif-badge-count">{unreadNotifCount}</span>
+                                    )}
+                                </button>
 
-                    <button
-                        type="button"
-                        className="nav-cart-btn"
-                        onClick={() => {
-                            setIsCartOpen(true);
-                            setMobileMenuOpen(false);
-                        }}
-                        aria-label={`Cart${cart.totalItems > 0 ? `, ${cart.totalItems} items` : ""}`}
-                    >
-                        <MarketplaceIcon name="cart" />
-                        <span>Cart</span>
-                        {cart.totalItems > 0 && (
-                            <span className="cart-badge-count">{cart.totalItems}</span>
-                        )}
-                    </button>
+                                {userRole === "ADMIN" && (
+                                    <button
+                                        type="button"
+                                        className="nav-admin-btn"
+                                        onClick={() => {
+                                            navigate("/admin");
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        aria-label="Open admin panel"
+                                    >
+                                        <MarketplaceIcon name="shield" />
+                                        <span>Admin</span>
+                                    </button>
+                                )}
+                            </div>
 
-                    {/* Seller Notifications Button with Unread Badge */}
-                    <button
-                        type="button"
-                        className={`nav-notif-btn ${unreadNotifCount > 0 ? "has-unread" : ""}`}
-                        onClick={() => {
-                            setIsNotifOpen(true);
-                            setMobileMenuOpen(false);
-                        }}
-                        aria-label={`Notifications${unreadNotifCount > 0 ? `, ${unreadNotifCount} unread` : ""}`}
-                    >
-                        <MarketplaceIcon name="bell" />
-                        <span>Alerts</span>
-                        {unreadNotifCount > 0 && (
-                            <span className="notif-badge-count">{unreadNotifCount}</span>
-                        )}
-                    </button>
-
-                    {/* Admin Panel Quick Link (Visible only for ADMIN role) */}
-                    {userRole === "ADMIN" && (
-                        <button
-                            type="button"
-                            className="nav-admin-btn"
-                            onClick={() => {
-                                navigate("/admin");
-                                setMobileMenuOpen(false);
-                            }}
-                            aria-label="Open admin panel"
-                        >
-                            <MarketplaceIcon name="shield" />
-                            <span>Admin</span>
-                        </button>
-                    )}
-
-                    <div className="user-profile-badge">
-                        <span className="user-avatar-circle">
-                            {(currentUserEmail || "U").charAt(0).toUpperCase()}
-                        </span>
-                        <div className="user-info-text">
-                            <span className="user-email">{currentUserEmail || "Account"}</span>
-                            <span className="user-role-badge">
-                                {displayRole}
-                            </span>
+                            <div className="navbar-account-group">
+                                <div className="user-profile-badge">
+                                    <span className="user-avatar-circle">
+                                        {currentUserEmail.charAt(0).toUpperCase() || "U"}
+                                    </span>
+                                    <div className="user-info-text">
+                                        <span className="user-email">{currentUserEmail || "Account"}</span>
+                                        <span className="user-role-badge">{displayRole}</span>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="nav-logout-btn"
+                                    aria-label="Log out"
+                                    onClick={() => {
+                                        setMobileMenuOpen(false);
+                                        handleLogout();
+                                    }}
+                                >
+                                    <MarketplaceIcon name="logout" />
+                                    <span>Log out</span>
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="navbar-account-group">
+                            <button
+                                type="button"
+                                className="nav-messages-btn"
+                                aria-label="Login"
+                                onClick={() => {
+                                    navigate("/login");
+                                    setMobileMenuOpen(false);
+                                }}
+                            >
+                                <LogIn size={18} aria-hidden="true" />
+                                <span>Login</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="nav-messages-btn"
+                                aria-label="Register"
+                                onClick={() => {
+                                    navigate("/register");
+                                    setMobileMenuOpen(false);
+                                }}
+                            >
+                                <UserPlus size={18} aria-hidden="true" />
+                                <span>Register</span>
+                            </button>
                         </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        className="nav-logout-btn"
-                        onClick={() => {
-                            setMobileMenuOpen(false);
-                            handleLogout();
-                        }}
-                    >
-                        <MarketplaceIcon name="logout" />
-                        <span>Log out</span>
-                    </button>
+                    )}
                 </nav>
+                </div>
             </header>
 
             {/* Main Content Area */}
@@ -916,7 +1005,7 @@ function Home() {
                             <button
                                 type="button"
                                 className="banner-sell-cta"
-                                onClick={() => setActiveTab("SELL")}
+                                onClick={() => changeMode("SELL")}
                             >
                                 <MarketplaceIcon name="plus" />
                                 <span>Sell an item</span>
@@ -989,7 +1078,7 @@ function Home() {
                                 <button
                                     type="button"
                                     className="primary-action-btn"
-                                    onClick={() => setActiveTab("SELL")}
+                                    onClick={() => changeMode("SELL")}
                                 >
                                     + Start Selling Now
                                 </button>
@@ -1160,7 +1249,7 @@ function Home() {
                                 <button
                                     type="button"
                                     className="back-to-buy-btn"
-                                    onClick={() => setActiveTab("BUY")}
+                                    onClick={() => changeMode("BUY")}
                                 >
                                     ← Back to BUY Page
                                 </button>
@@ -1362,7 +1451,7 @@ function Home() {
                                     <button
                                         type="button"
                                         className="cancel-listing-btn"
-                                        onClick={() => setActiveTab("BUY")}
+                                        onClick={() => changeMode("BUY")}
                                     >
                                         Cancel
                                     </button>

@@ -1042,19 +1042,6 @@
    RESPONSIVE DESIGN
    ------------------------------------------------------------ */
 @media (max-width: 900px) {
-    .marketplace-navbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .navbar-left {
-        justify-content: space-between;
-    }
-
-    .navbar-search {
-        max-width: 100%;
-    }
-
     .form-grid-row {
         grid-template-columns: 1fr;
     }
@@ -1734,46 +1721,7 @@
     opacity: 0.7;
 }
 
-@media (max-width: 1100px) {
-    .marketplace-navbar {
-        flex-wrap: wrap;
-    }
-
-    .navbar-left {
-        flex: 1 1 100%;
-        justify-content: space-between;
-    }
-
-    .navbar-search {
-        flex: 1 1 220px;
-        max-width: none;
-    }
-}
-
 @media (max-width: 720px) {
-    .marketplace-navbar {
-        gap: 8px 12px;
-        padding: 10px 16px;
-    }
-
-    .navbar-left {
-        gap: 12px;
-    }
-
-    .brand-tagline {
-        display: none;
-    }
-
-    .navbar-right {
-        flex: 1 1 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .user-profile-badge {
-        margin-left: auto;
-    }
-
     .marketplace-content {
         padding-top: 20px;
     }
@@ -1792,69 +1740,6 @@
 }
 
 @media (max-width: 520px) {
-    .brand-mark {
-        width: 31px;
-        height: 31px;
-    }
-
-    .brand-title {
-        font-size: 14px;
-    }
-
-    .mode-tabs {
-        gap: 0;
-    }
-
-    .tab-btn,
-    .tab-btn.sell-tab-btn {
-        min-height: 38px;
-        padding: 0 7px;
-        font-size: 13px;
-    }
-
-    .tab-btn::after {
-        bottom: -8px;
-    }
-
-    .navbar-search {
-        flex-basis: 100%;
-    }
-
-    .navbar-right {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 4px;
-    }
-
-    .nav-cart-btn,
-    .nav-messages-btn,
-    .nav-notif-btn,
-    .nav-admin-btn,
-    .nav-logout-btn {
-        justify-content: center;
-        padding: 6px 4px;
-        font-size: 11px;
-        gap: 4px;
-    }
-
-    .navbar-right .marketplace-icon {
-        width: 16px;
-        height: 16px;
-    }
-
-    .user-profile-badge {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        margin: 3px 0 0;
-        padding: 7px 0 0;
-        border-top: 1px solid var(--color-border);
-        border-left: 0;
-    }
-
-    .user-email {
-        max-width: 230px;
-    }
-
     .marketplace-content {
         padding: 16px 14px 36px;
     }
@@ -2086,24 +1971,6 @@
     font-weight: 700;
 }
 
-@media (max-width: 860px) {
-    .nav-messages-btn {
-        padding: 8px;
-    }
-}
-
-.navbar-search {
-    gap: 0;
-}
-
-.navbar-search input {
-    padding-right: 96px;
-}
-
-.clear-search {
-    right: 52px;
-}
-
 .search-submit-btn {
     min-height: 34px;
     position: absolute;
@@ -2118,141 +1985,7 @@
     cursor: pointer;
 }
 
-.mobile-mode-tabs {
-    display: none;
-}
-
-.mobile-menu-toggle {
-    display: none;
-    width: 44px;
-    height: 44px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    background: var(--color-surface);
-    color: var(--color-text);
-    cursor: pointer;
-}
-
 @media (max-width: 900px) {
-    .marketplace-navbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 8px 12px;
-        padding: 8px 14px;
-    }
-
-    .navbar-left {
-        grid-column: 1 / -1;
-        width: 100%;
-        min-width: 0;
-        justify-content: space-between;
-        gap: 8px;
-    }
-
-    .desktop-mode-tabs {
-        display: none;
-    }
-
-    .brand-logo {
-        min-width: 0;
-    }
-
-    .brand-title {
-        overflow: hidden;
-        font-size: 15px;
-        text-overflow: ellipsis;
-    }
-
-    .mobile-menu-toggle {
-        display: inline-flex;
-        flex: 0 0 44px;
-    }
-
-    .navbar-right .mobile-mode-tabs {
-        display: flex;
-    }
-
-    .mode-tabs {
-        gap: 4px;
-    }
-
-    .navbar-search {
-        grid-column: 1 / -1;
-        width: 100%;
-        min-width: 0;
-        max-width: none;
-    }
-
-    .navbar-search input {
-        min-width: 0;
-        min-height: 44px;
-        padding-right: 100px;
-    }
-
-    .search-submit-btn {
-        min-height: 36px;
-    }
-
-    .navbar-right {
-        display: none;
-        grid-column: 1 / -1;
-        min-width: 0;
-        margin: 0 -14px -8px;
-        padding: 8px 14px 12px;
-        border-top: 1px solid var(--color-border);
-        background: var(--color-surface);
-    }
-
-    .navbar-right.is-open {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 4px;
-    }
-
-    .navbar-right .mode-tabs {
-        grid-column: 1 / -1;
-        justify-content: flex-start;
-        padding-bottom: 4px;
-    }
-
-    .navbar-right .tab-btn {
-        min-height: 44px;
-        padding: 0 12px;
-    }
-
-    .navbar-right .tab-btn::after {
-        bottom: -4px;
-    }
-
-    .navbar-right > button {
-        min-width: 0;
-        min-height: 44px;
-        justify-content: flex-start;
-        padding: 8px 10px;
-        white-space: nowrap;
-    }
-
-    .navbar-right .user-profile-badge {
-        grid-column: 1 / -1;
-        grid-row: auto;
-        min-height: 48px;
-        margin: 4px 0 0;
-        padding: 8px 2px 0;
-        border-top: 1px solid var(--color-border);
-        border-left: 0;
-    }
-
-    .navbar-right .user-email {
-        max-width: min(70vw, 320px);
-    }
-
-    .navbar-right .nav-logout-btn {
-        grid-column: 1 / -1;
-    }
-
     .marketplace-content {
         padding: 18px 16px 40px;
     }
@@ -2333,26 +2066,6 @@
 }
 
 @media (max-width: 390px) {
-    .marketplace-navbar {
-        padding-inline: 12px;
-    }
-
-    .navbar-right {
-        margin-inline: -12px;
-        padding-inline: 12px;
-    }
-
-    .brand-mark {
-        width: 30px;
-        height: 30px;
-        flex: 0 0 30px;
-    }
-
-    .brand-title {
-        max-width: 190px;
-        font-size: 14px;
-    }
-
     .marketplace-content {
         padding-inline: 12px;
     }
@@ -2401,4 +2114,554 @@
 .search-submit-btn:focus-visible {
     outline: 3px solid rgb(40 89 168 / 30%);
     outline-offset: 2px;
+}
+
+/* Responsive marketplace navigation */
+.marketplace-navbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow: visible;
+}
+
+.navbar-left {
+    grid-column: 1;
+    min-width: 0;
+    gap: 0;
+}
+
+.brand-logo {
+    min-width: 0;
+}
+
+.mode-tabs {
+    grid-column: 2;
+    justify-self: center;
+    display: flex;
+    align-self: center;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid #dce3ed;
+    border-radius: 22px;
+    background: #f1f4f8;
+}
+
+.mode-tabs .tab-btn,
+.mode-tabs .tab-btn.sell-tab-btn {
+    min-width: 52px;
+    min-height: 34px;
+    justify-content: center;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 18px;
+    color: #556273;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.mode-tabs .tab-btn::after {
+    display: none;
+}
+
+.mode-tabs .tab-btn.active-buy {
+    background: #2859a8;
+    box-shadow: 0 2px 6px rgb(40 89 168 / 24%);
+    color: #fff;
+}
+
+.mode-tabs .tab-btn.sell-tab-btn.active-sell {
+    background: #16835d;
+    box-shadow: 0 2px 6px rgb(22 131 93 / 24%);
+    color: #fff;
+}
+
+.navbar-tools {
+    grid-column: 3;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.navbar-search {
+    position: relative;
+    width: min(240px, 100%);
+    min-width: 130px;
+    max-width: 240px;
+    flex: 0 1 240px;
+}
+
+.navbar-search-form {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+}
+
+.navbar-search-form > .marketplace-icon {
+    position: absolute;
+    left: 12px;
+    width: 17px;
+    height: 17px;
+    color: #8993a0;
+    pointer-events: none;
+}
+
+.navbar-search-form input {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 96px 8px 38px;
+}
+
+.navbar-search-form .clear-search {
+    right: 72px;
+}
+
+.navbar-search-form .search-submit-btn {
+    display: inline-flex;
+    min-width: 62px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.search-submit-btn .marketplace-icon,
+.mobile-search-close,
+.mobile-search-toggle {
+    display: none;
+}
+
+.navbar-right {
+    display: flex;
+    flex: 0 0 auto;
+    min-width: max-content;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.navbar-action-group,
+.navbar-account-group {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 2px;
+}
+
+.navbar-right .user-profile-badge {
+    flex: 0 1 auto;
+}
+
+.mobile-menu-toggle {
+    display: none;
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+    .marketplace-navbar {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        gap: 8px 10px;
+        padding: 9px 12px;
+    }
+
+    .navbar-left {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .mode-tabs {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .navbar-tools {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .navbar-search {
+        width: auto;
+        max-width: none;
+        flex: 1 1 auto;
+    }
+
+    .brand-mark {
+        width: 30px;
+        height: 30px;
+    }
+
+    .brand-title {
+        font-size: 14px;
+    }
+
+    .mode-tabs .tab-btn,
+    .mode-tabs .tab-btn.sell-tab-btn {
+        min-width: 46px;
+        padding-inline: 8px;
+    }
+
+    .navbar-right {
+        gap: 0;
+    }
+
+    .navbar-action-group,
+    .navbar-account-group {
+        gap: 0;
+    }
+
+    .navbar-right .nav-messages-btn,
+    .navbar-right .nav-cart-btn,
+    .navbar-right .nav-notif-btn,
+    .navbar-right .nav-admin-btn,
+    .navbar-right .nav-logout-btn {
+        width: 36px;
+        min-width: 36px;
+        justify-content: center;
+        padding: 6px;
+    }
+
+    .navbar-right button > span:not(.cart-badge-count):not(.notif-badge-count):not(.message-badge-count) {
+        display: none;
+    }
+
+    .navbar-right .user-profile-badge {
+        padding-inline: 5px;
+        border-left: 0;
+    }
+
+    .navbar-right .user-info-text {
+        display: none;
+    }
+}
+
+@media (min-width: 1101px) and (max-width: 1600px) {
+    .navbar-search {
+        width: clamp(160px, 16vw, 240px);
+        min-width: 160px;
+        max-width: 240px;
+    }
+
+    .navbar-right,
+    .navbar-action-group,
+    .navbar-account-group {
+        gap: 0;
+    }
+
+    .navbar-right .nav-messages-btn,
+    .navbar-right .nav-cart-btn,
+    .navbar-right .nav-notif-btn,
+    .navbar-right .nav-admin-btn,
+    .navbar-right .nav-logout-btn {
+        width: 36px;
+        min-width: 36px;
+        justify-content: center;
+        padding: 6px;
+    }
+
+    .navbar-right button > span:not(.cart-badge-count):not(.notif-badge-count):not(.message-badge-count) {
+        display: none;
+    }
+
+    .navbar-right .user-profile-badge {
+        padding-inline: 5px;
+        border-left: 0;
+    }
+
+    .navbar-right .user-info-text {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .marketplace-navbar {
+        position: sticky;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto 36px 36px;
+        align-items: center;
+        gap: 4px;
+        min-height: 54px;
+        padding: 7px 8px;
+        z-index: 120;
+    }
+
+    .navbar-left {
+        grid-column: 1;
+        width: auto;
+        min-width: 0;
+    }
+
+    .navbar-tools {
+        display: contents;
+    }
+
+    .brand-logo {
+        max-width: 100%;
+        gap: 4px;
+    }
+
+    .brand-mark {
+        width: 26px;
+        height: 26px;
+        flex: 0 0 26px;
+        border-radius: 7px;
+        font-size: 10px;
+    }
+
+    .brand-title {
+        max-width: 88px;
+        overflow: hidden;
+        font-size: 11px;
+        text-overflow: clip;
+        white-space: nowrap;
+    }
+
+    .mode-tabs {
+        grid-column: 2;
+        gap: 1px;
+        padding: 2px;
+        border-radius: 18px;
+    }
+
+    .mode-tabs .tab-btn,
+    .mode-tabs .tab-btn.sell-tab-btn {
+        min-width: 44px;
+        min-height: 32px;
+        padding-inline: 6px;
+        font-size: 10px;
+    }
+
+    .navbar-search {
+        grid-column: 3;
+        width: 36px;
+        height: 36px;
+        min-width: 0;
+        justify-self: center;
+        z-index: 2;
+    }
+
+    .mobile-search-toggle {
+        display: inline-flex;
+        width: 36px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid var(--color-border);
+        border-radius: 7px;
+        background: #fff;
+        color: #455365;
+        cursor: pointer;
+    }
+
+    .navbar-search:not(.is-expanded) .navbar-search-form {
+        display: none;
+    }
+
+    .navbar-search.is-expanded {
+        position: absolute;
+        grid-column: 1 / -1;
+        top: 7px;
+        right: 52px;
+        bottom: 7px;
+        left: 8px;
+        width: auto;
+        height: auto;
+        z-index: 4;
+    }
+
+    .navbar-search.is-expanded .mobile-search-toggle {
+        display: none;
+    }
+
+    .navbar-search-form {
+        height: 100%;
+        padding: 3px;
+        border: 1px solid #cbd6e4;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 5px 15px rgb(20 39 67 / 14%);
+        opacity: 0;
+        transform: translateX(8px);
+        visibility: hidden;
+        transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
+    }
+
+    .navbar-search.is-expanded .navbar-search-form {
+        opacity: 1;
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .navbar-search-form > .marketplace-icon {
+        left: 11px;
+    }
+
+    .navbar-search-form input {
+        min-height: 34px;
+        height: 100%;
+        padding: 5px 78px 5px 34px;
+        border: 0;
+        background: #fff;
+        font-size: 13px;
+    }
+
+    .navbar-search-form input:focus {
+        border: 0;
+        box-shadow: none;
+    }
+
+    .navbar-search-form .clear-search {
+        display: none;
+    }
+
+    .navbar-search-form .search-submit-btn {
+        right: 40px;
+        min-width: 32px;
+        width: 32px;
+        min-height: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 6px;
+    }
+
+    .search-submit-btn .marketplace-icon {
+        display: block;
+        width: 17px;
+        height: 17px;
+    }
+
+    .search-submit-btn span {
+        display: none;
+    }
+
+    .mobile-search-close {
+        position: absolute;
+        right: 3px;
+        display: inline-flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #536174;
+        cursor: pointer;
+    }
+
+    .mobile-menu-toggle {
+        grid-column: 4;
+        display: inline-flex;
+        width: 36px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid var(--color-border);
+        border-radius: 7px;
+        background: #fff;
+        color: #344154;
+        cursor: pointer;
+        z-index: 6;
+    }
+
+    .navbar-right,
+    .navbar-right.is-open {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        display: none;
+        max-height: calc(100dvh - 62px);
+        min-width: 0;
+        grid-column: auto;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        margin: 0;
+        padding: 12px 14px max(12px, env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border: 1px solid var(--color-border);
+        border-top: 0;
+        border-radius: 0 0 10px 10px;
+        background: #fff;
+        box-shadow: 0 12px 24px rgb(20 39 67 / 16%);
+        z-index: 5;
+    }
+
+    .navbar-right.is-open {
+        display: grid;
+    }
+
+    .navbar-action-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .navbar-account-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+        padding-top: 8px;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .navbar-right .nav-messages-btn,
+    .navbar-right .nav-cart-btn,
+    .navbar-right .nav-notif-btn,
+    .navbar-right .nav-admin-btn,
+    .navbar-right .nav-logout-btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        justify-content: flex-start;
+        padding: 8px 10px;
+        white-space: normal;
+    }
+
+    .navbar-right button > span:not(.cart-badge-count):not(.notif-badge-count):not(.message-badge-count) {
+        display: inline;
+    }
+
+    .navbar-right .user-profile-badge {
+        grid-column: 1 / -1;
+        min-height: 48px;
+        margin: 0;
+        padding: 4px 2px 8px;
+        border: 0;
+        border-bottom: 1px solid var(--color-border);
+        border-radius: 0;
+    }
+
+    .navbar-right .user-info-text {
+        display: flex;
+    }
+
+    .navbar-right .user-email {
+        max-width: calc(100vw - 100px);
+    }
+
+    .navbar-right .nav-logout-btn {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .navbar-search-form {
+        transition: none;
+    }
 }
