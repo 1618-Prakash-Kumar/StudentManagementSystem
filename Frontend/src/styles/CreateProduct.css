@@ -129,25 +129,42 @@
 
 @media (max-width: 640px) {
     .create-product-container {
-        padding: 22px;
+        min-height: 100svh;
+        min-height: 100dvh;
+        padding: 16px;
     }
 
     .create-product-panel {
-        padding: 22px;
+        padding: clamp(16px, 5vw, 22px);
     }
 
-    .create-product-header,
     .form-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .create-product-header {
         align-items: flex-start;
         flex-direction: column;
+        gap: 12px;
+    }
+
+    .create-product-header h1 {
+        font-size: clamp(26px, 8vw, 32px);
     }
 
     .secondary-button,
     .primary-button {
         width: 100%;
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 360px) {
+    .create-product-container {
+        padding: 10px;
+    }
+
+    .create-product-panel {
+        padding: 14px;
     }
 }

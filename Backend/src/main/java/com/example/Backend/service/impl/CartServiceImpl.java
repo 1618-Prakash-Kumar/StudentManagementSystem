@@ -165,6 +165,10 @@ public class CartServiceImpl implements CartService {
         }
 
         Product product = cartItem.getProduct();
+        if (product.getStatus() != ProductStatus.AVAILABLE
+                && request.getQuantity() >= cartItem.getQuantity()) {
+            throw new BadRequestException("Item not available. Remove it from your cart or reduce its quantity.");
+        }
         if (request.getQuantity() > product.getQuantity()) {
             throw new BadRequestException("Requested quantity (" + request.getQuantity() + ") exceeds available stock (" + product.getQuantity() + ").");
         }

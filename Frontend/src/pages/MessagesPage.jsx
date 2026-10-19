@@ -59,7 +59,8 @@ function MessagesPage() {
     const productId = searchParams.get("productId");
     const currentUserEmail = (localStorage.getItem("userEmail") || "").toLowerCase();
     const startedProductRef = useRef(null);
-    const messagesEndRef = useRef(null);
+    const messageHistoryRef = useRef(null);
+    const scrollToLatestRef = useRef(false);
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
     const [listLoading, setListLoading] = useState(true);
@@ -92,11 +93,17 @@ function MessagesPage() {
         if (!id) return;
         if (showLoading) {
             setMessages([]);
+            scrollToLatestRef.current = true;
             setHistoryError("");
             setHistoryLoading(true);
         }
         try {
             const data = await messagingRequest(`/api/conversations/${id}/messages`);
+            const history = messageHistoryRef.current;
+            const isNearBottom = history
+                ? history.scrollHeight - history.scrollTop - history.clientHeight < 120
+                : true;
+            scrollToLatestRef.current = scrollToLatestRef.current || isNearBottom;
             setMessages(data);
             setHistoryError("");
             await messagingRequest(`/api/conversations/${id}/read`, { method: "PUT" });
@@ -156,13 +163,21 @@ function MessagesPage() {
     }, [conversationId, loadMessages]);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (!scrollToLatestRef.current) return;
+        scrollToLatestRef.current = false;
+        const history = messageHistoryRef.current;
+        if (history) {
+            requestAnimationFrame(() => {
+                history.scrollTop = history.scrollHeight;
+            });
+        }
     }, [messages]);
 
     const sendMessage = async (event) => {
         event.preventDefault();
         const content = input.trim();
         if (!content || !conversationId || sending) return;
+        scrollToLatestRef.current = true;
         setSending(true);
         setSendError("");
         try {
@@ -294,7 +309,7 @@ function MessagesPage() {
                                 </div>
                             </header>
 
-                            <div className="message-history" aria-live="polite">
+                            <div className="message-history" aria-live="polite" ref={messageHistoryRef}>
                                 {historyLoading && messages.length === 0 ? (
                                     <div className="messages-state">Loading message history…</div>
                                 ) : historyError ? (
@@ -324,7 +339,6 @@ function MessagesPage() {
                                                 </article>
                                             );
                                         })}
-                                        <div ref={messagesEndRef} />
                                     </div>
                                 )}
                             </div>

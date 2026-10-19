@@ -252,3 +252,75 @@
     border-radius: 50%;
     background: #ef4444;
 }
+
+.notif-modal-container {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    min-width: 0;
+}
+
+.notif-modal-body {
+    min-height: 0;
+    overscroll-behavior: contain;
+}
+
+@media (max-width: 520px) {
+    .notif-modal-header {
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+    }
+
+    .notif-header-title {
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .notif-header-title h2 {
+        font-size: 1.05rem;
+    }
+
+    .notif-header-actions {
+        flex: 0 0 auto;
+        gap: 6px;
+    }
+
+    .mark-all-btn {
+        min-height: 40px;
+        padding-inline: 8px;
+        font-size: 11px;
+    }
+
+    .notif-modal-body {
+        padding: 14px;
+    }
+
+    .notif-card {
+        padding: 13px;
+    }
+
+    .notif-product-row,
+    .notif-card-header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .notif-product-title {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .buyer-field {
+        min-width: 0;
+        align-items: flex-start;
+        overflow-wrap: anywhere;
+    }
+
+    .buyer-val,
+    .buyer-link {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+}

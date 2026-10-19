@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ImagePlus, MessageCircle, Package, X } from "lucide-react";
+import { ImagePlus, Menu, MessageCircle, Package, X } from "lucide-react";
 import CartModal from "./CartModal";
 import NotificationModal from "./NotificationModal";
 import "../styles/Home.css";
@@ -140,6 +140,7 @@ function Home() {
 
     // Mode state: 'BUY' (default) or 'SELL'
     const [activeTab, setActiveTab] = useState("BUY");
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Product state
     const [products, setProducts] = useState([]);
@@ -691,7 +692,7 @@ function Home() {
                         </span>
                     </button>
 
-                    <nav className="mode-tabs" aria-label="Marketplace">
+                    <nav className="mode-tabs desktop-mode-tabs" aria-label="Marketplace">
                         <button
                             type="button"
                             className={`tab-btn ${activeTab === "BUY" ? "active-buy" : ""}`}
@@ -700,7 +701,6 @@ function Home() {
                         >
                             Browse
                         </button>
-
                         <button
                             type="button"
                             className={`tab-btn sell-tab-btn ${activeTab === "SELL" ? "active-sell" : ""}`}
@@ -710,6 +710,17 @@ function Home() {
                             Sell
                         </button>
                     </nav>
+
+                    <button
+                        type="button"
+                        className="mobile-menu-toggle"
+                        aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                        aria-expanded={mobileMenuOpen}
+                        aria-controls="marketplace-navigation"
+                        onClick={() => setMobileMenuOpen((open) => !open)}
+                    >
+                        {mobileMenuOpen ? <X size={21} aria-hidden="true" /> : <Menu size={21} aria-hidden="true" />}
+                    </button>
                 </div>
 
                 {activeTab === "BUY" && (
@@ -752,11 +763,44 @@ function Home() {
                     </form>
                 )}
 
-                <nav className="navbar-right" aria-label="Account and marketplace actions">
+                <nav
+                    id="marketplace-navigation"
+                    className={`navbar-right ${mobileMenuOpen ? "is-open" : ""}`}
+                    aria-label="Account and marketplace actions"
+                >
+                    <div className="mode-tabs mobile-mode-tabs" role="group" aria-label="Marketplace">
+                        <button
+                            type="button"
+                            className={`tab-btn ${activeTab === "BUY" ? "active-buy" : ""}`}
+                            onClick={() => {
+                                setActiveTab("BUY");
+                                setMobileMenuOpen(false);
+                            }}
+                            aria-current={activeTab === "BUY" ? "page" : undefined}
+                        >
+                            Browse
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`tab-btn sell-tab-btn ${activeTab === "SELL" ? "active-sell" : ""}`}
+                            onClick={() => {
+                                setActiveTab("SELL");
+                                setMobileMenuOpen(false);
+                            }}
+                            aria-current={activeTab === "SELL" ? "page" : undefined}
+                        >
+                            Sell
+                        </button>
+                    </div>
+
                     <button
                         type="button"
                         className="nav-messages-btn"
-                        onClick={() => navigate("/messages")}
+                        onClick={() => {
+                            navigate("/messages");
+                            setMobileMenuOpen(false);
+                        }}
                         aria-label={`Messages${unreadMessageCount > 0 ? `, ${unreadMessageCount} unread` : ""}`}
                     >
                         <MessageCircle size={18} aria-hidden="true" />
@@ -771,7 +815,10 @@ function Home() {
                     <button
                         type="button"
                         className="nav-messages-btn nav-my-listings-btn"
-                        onClick={() => navigate("/my-listings")}
+                        onClick={() => {
+                            navigate("/my-listings");
+                            setMobileMenuOpen(false);
+                        }}
                         aria-label="Open My Listings"
                     >
                         <Package size={18} aria-hidden="true" />
@@ -781,7 +828,10 @@ function Home() {
                     <button
                         type="button"
                         className="nav-cart-btn"
-                        onClick={() => setIsCartOpen(true)}
+                        onClick={() => {
+                            setIsCartOpen(true);
+                            setMobileMenuOpen(false);
+                        }}
                         aria-label={`Cart${cart.totalItems > 0 ? `, ${cart.totalItems} items` : ""}`}
                     >
                         <MarketplaceIcon name="cart" />
@@ -795,7 +845,10 @@ function Home() {
                     <button
                         type="button"
                         className={`nav-notif-btn ${unreadNotifCount > 0 ? "has-unread" : ""}`}
-                        onClick={() => setIsNotifOpen(true)}
+                        onClick={() => {
+                            setIsNotifOpen(true);
+                            setMobileMenuOpen(false);
+                        }}
                         aria-label={`Notifications${unreadNotifCount > 0 ? `, ${unreadNotifCount} unread` : ""}`}
                     >
                         <MarketplaceIcon name="bell" />
@@ -810,7 +863,10 @@ function Home() {
                         <button
                             type="button"
                             className="nav-admin-btn"
-                            onClick={() => navigate("/admin")}
+                            onClick={() => {
+                                navigate("/admin");
+                                setMobileMenuOpen(false);
+                            }}
                             aria-label="Open admin panel"
                         >
                             <MarketplaceIcon name="shield" />
@@ -830,7 +886,14 @@ function Home() {
                         </div>
                     </div>
 
-                    <button type="button" className="nav-logout-btn" onClick={handleLogout}>
+                    <button
+                        type="button"
+                        className="nav-logout-btn"
+                        onClick={() => {
+                            setMobileMenuOpen(false);
+                            handleLogout();
+                        }}
+                    >
                         <MarketplaceIcon name="logout" />
                         <span>Log out</span>
                     </button>

@@ -265,22 +265,13 @@ public class ProductServiceImpl implements ProductService {
             );
         }
 
-        if (cartItemRepository.existsByProduct(product)) {
-            throw new BadRequestException(
-                    "This listing is in a user's cart and cannot be deleted. Ask the user to remove it from their cart first."
-            );
-        }
-        if (notificationRepository.existsByProduct(product)) {
-            throw new BadRequestException(
-                    "This listing has related activity notifications that must be preserved, so it cannot be deleted."
-            );
-        }
-
         List<String> storageKeys = product.getImages().stream()
                 .map(ProductImage::getStorageKey)
                 .filter(key -> key != null && !key.isBlank())
                 .toList();
         storageKeys.forEach(imageStorageService::delete);
+        cartItemRepository.deleteForProduct(product.getId());
+        notificationRepository.clearProductReference(product.getId());
         conversationRepository.clearProductReference(product.getId());
         productRepository.delete(product);
     }

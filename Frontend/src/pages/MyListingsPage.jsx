@@ -46,6 +46,7 @@ function MyListingsPage() {
     const [filter, setFilter] = useState("ALL");
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState(null);
+    const [updatingAvailabilityId, setUpdatingAvailabilityId] = useState(null);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState(location.state?.notice || "");
 
@@ -126,6 +127,58 @@ function MyListingsPage() {
             setError(deleteError.message || "Unable to delete this listing.");
         } finally {
             setDeletingId(null);
+        }
+    };
+
+    const updateAvailability = async (listing) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            navigate("/login", { replace: true, state: { from: location.pathname } });
+            return;
+        }
+        const nextStatus = listing.status === "AVAILABLE" ? "NOT_AVAILABLE" : "AVAILABLE";
+        if (nextStatus === "AVAILABLE" && listing.quantity <= 0) {
+            setError("Add stock to this listing before making it available.");
+            setNotice("");
+            return;
+        }
+
+        setUpdatingAvailabilityId(listing.id);
+        setError("");
+        setNotice("");
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/products/${listing.id}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    title: listing.title,
+                    description: listing.description || "",
+                    price: listing.price,
+                    quantity: listing.quantity,
+                    categoryId: listing.categoryId,
+                    productCondition: listing.productCondition,
+                    status: nextStatus,
+                }),
+            });
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem("token");
+                navigate("/login", { replace: true, state: { from: location.pathname } });
+                return;
+            }
+            if (!response.ok) {
+                throw new Error(await getErrorMessage(response, "Unable to update listing availability."));
+            }
+            const updatedListing = await response.json();
+            setListings((current) => current.map((item) =>
+                item.id === listing.id ? updatedListing : item));
+            setNotice(`"${listing.title}" is now ${nextStatus === "AVAILABLE" ? "available" : "unavailable"}.`);
+        } catch (updateError) {
+            setError(updateError.message || "Unable to update listing availability.");
+        } finally {
+            setUpdatingAvailabilityId(null);
         }
     };
 
@@ -227,6 +280,21 @@ function MyListingsPage() {
                                         <div className="my-listing-actions">
                                             <button
                                                 type="button"
+                                                className="my-listing-availability"
+                                                onClick={() => updateAvailability(listing)}
+                                                disabled={updatingAvailabilityId === listing.id
+                                                    || deletingId === listing.id
+                                                    || (listing.status !== "AVAILABLE" && listing.quantity <= 0)}
+                                                title={listing.quantity <= 0 && listing.status !== "AVAILABLE"
+                                                    ? "Add stock before making this listing available"
+                                                    : ""}
+                                            >
+                                                {updatingAvailabilityId === listing.id
+                                                    ? "Updating..."
+                                                    : available ? "Mark unavailable" : "Mark available"}
+                                            </button>
+                                            <button
+                                                type="button"
                                                 className="my-listing-edit"
                                                 onClick={() => navigate(`/my-listings/${listing.id}/edit`)}
                                             >
@@ -236,7 +304,7 @@ function MyListingsPage() {
                                                 type="button"
                                                 className="my-listing-delete"
                                                 onClick={() => deleteListing(listing)}
-                                                disabled={deletingId === listing.id}
+                                                disabled={deletingId === listing.id || updatingAvailabilityId === listing.id}
                                             >
                                                 <Trash2 size={15} aria-hidden="true" />
                                                 {deletingId === listing.id ? "Deleting..." : "Delete"}

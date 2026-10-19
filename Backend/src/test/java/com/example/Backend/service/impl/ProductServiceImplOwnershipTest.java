@@ -2,6 +2,7 @@ package com.example.Backend.service.impl;
 
 import com.example.Backend.entity.Product;
 import com.example.Backend.entity.ProductImage;
+import com.example.Backend.entity.Category;
 import com.example.Backend.entity.Role;
 import com.example.Backend.entity.User;
 import com.example.Backend.exception.BadRequestException;
@@ -115,17 +116,53 @@ class ProductServiceImplOwnershipTest {
     }
 
     @Test
-    void deleteRefusesProductsStillReferencedByACart() {
+    void deleteCleansOnlyRelationsForTheDeletedListingAndPreservesNotifications() {
         User owner = User.builder().id(21L).email("owner@example.edu").role(Role.STUDENT).build();
         Product product = Product.builder().id(4L).seller(owner).build();
         when(productRepository.findById(4L)).thenReturn(Optional.of(product));
         when(userRepository.findByEmailIgnoreCase("owner@example.edu")).thenReturn(Optional.of(owner));
-        when(cartItemRepository.existsByProduct(product)).thenReturn(true);
 
-        assertThrows(BadRequestException.class,
-                () -> productService.deleteProduct(4L, "owner@example.edu"));
-        verify(productRepository, never()).delete(product);
-        verifyNoInteractions(notificationRepository);
+        productService.deleteProduct(4L, "owner@example.edu");
+
+        verify(cartItemRepository).deleteForProduct(4L);
+        verify(notificationRepository).clearProductReference(4L);
+        verify(productRepository).delete(product);
+    }
+
+    @Test
+    void listingOwnerCanChangeAvailabilityAndPersistStatus() {
+        User owner = User.builder().id(21L).email("owner@example.edu").role(Role.STUDENT).build();
+        Category category = Category.builder().id(8L).name("Books").build();
+        Product product = Product.builder()
+                .id(4L)
+                .title("Book")
+                .description("Used")
+                .price(java.math.BigDecimal.TEN)
+                .quantity(2)
+                .category(category)
+                .seller(owner)
+                .status(com.example.Backend.entity.ProductStatus.AVAILABLE)
+                .build();
+        when(productRepository.findById(4L)).thenReturn(Optional.of(product));
+        when(userRepository.findByEmailIgnoreCase("owner@example.edu")).thenReturn(Optional.of(owner));
+        when(categoryRepository.findById(8L)).thenReturn(Optional.of(category));
+        when(productRepository.save(product)).thenReturn(product);
+
+        var response = productService.updateProduct(
+                4L,
+                com.example.Backend.dto.product.ProductRequest.builder()
+                        .title("Book")
+                        .description("Used")
+                        .price(java.math.BigDecimal.TEN)
+                        .quantity(2)
+                        .categoryId(8L)
+                        .status(com.example.Backend.entity.ProductStatus.NOT_AVAILABLE)
+                        .build(),
+                "owner@example.edu"
+        );
+
+        org.junit.jupiter.api.Assertions.assertEquals("NOT_AVAILABLE", response.getStatus());
+        verify(productRepository).save(product);
     }
 
     private com.example.Backend.service.storage.ImageStorageService imageStorageService() {

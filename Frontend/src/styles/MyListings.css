@@ -309,6 +309,7 @@
 
 .my-listing-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 9px;
     border-top: 1px solid #edf0f3;
     padding-top: 13px;
@@ -331,6 +332,10 @@
 
 .my-listing-edit {
     color: #245a8d;
+}
+
+.my-listing-availability {
+    color: #166534;
 }
 
 .my-listing-delete {
@@ -565,5 +570,80 @@
 
     .my-listing-form-actions button {
         width: 100%;
+    }
+}
+
+@media (max-width: 430px) {
+    .my-listings-page {
+        min-height: 100svh;
+        padding: 18px 12px;
+    }
+
+    .my-listings-back {
+        min-height: 44px;
+        margin-bottom: 14px;
+    }
+
+    .my-listings-heading {
+        gap: 14px;
+    }
+
+    .my-listings-heading h1 {
+        font-size: 28px;
+    }
+
+    .my-listings-description {
+        font-size: 14px;
+    }
+
+    .my-listings-summary {
+        gap: 8px;
+    }
+
+    .my-listings-summary > div {
+        padding: 10px;
+    }
+
+    .my-listings-summary span {
+        font-size: 12px;
+    }
+
+    .my-listings-filters {
+        max-width: 100%;
+        overscroll-behavior-x: contain;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .my-listing-body {
+        padding: 13px;
+    }
+
+    .my-listing-title-row {
+        flex-wrap: wrap;
+    }
+
+    .my-listing-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .my-listing-actions button {
+        min-height: 42px;
+        min-width: 0;
+        padding-inline: 8px;
+        font-size: 12px;
+    }
+
+    .my-listing-form-row {
+        gap: 12px;
+    }
+
+    .my-listing-editor {
+        padding: 14px;
+    }
+
+    .my-listing-image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 105px), 1fr));
     }
 }

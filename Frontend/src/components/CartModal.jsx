@@ -6,8 +6,11 @@ function CartModal({ cart, onUpdateQuantity, onRemoveItem, onClearCart, onClose 
 
     const handleQtyChange = async (itemId, newQty) => {
         setUpdatingId(itemId);
-        await onUpdateQuantity(itemId, newQty);
-        setUpdatingId(null);
+        try {
+            await onUpdateQuantity(itemId, newQty);
+        } finally {
+            setUpdatingId(null);
+        }
     };
 
     const items = cart?.items || [];
@@ -37,7 +40,9 @@ function CartModal({ cart, onUpdateQuantity, onRemoveItem, onClearCart, onClose 
                         </div>
                     ) : (
                         <div className="cart-items-list">
-                            {items.map((item) => (
+                            {items.map((item) => {
+                                const unavailable = item.productStatus !== "AVAILABLE" || item.availableQuantity <= 0;
+                                return (
                                 <div className="cart-item-row" key={item.id}>
                                     <div className="cart-item-info">
                                         <div className="cart-item-badge-row">
@@ -45,6 +50,11 @@ function CartModal({ cart, onUpdateQuantity, onRemoveItem, onClearCart, onClose 
                                             <span className="cart-condition-tag">✨ {item.productCondition || "GOOD"}</span>
                                         </div>
                                         <h4 className="cart-item-title">{item.productTitle}</h4>
+                                        {unavailable && (
+                                            <p className="cart-item-unavailable" role="status">
+                                                Item not available. Remove it or reduce its quantity.
+                                            </p>
+                                        )}
                                         <div className="cart-seller-info">
                                             <span>👤 Seller: <strong>{item.sellerName || "Campus Student"}</strong></span>
                                             {item.sellerPhone && (
@@ -72,8 +82,12 @@ function CartModal({ cart, onUpdateQuantity, onRemoveItem, onClearCart, onClose 
                                                 type="button"
                                                 className="qty-btn"
                                                 onClick={() => handleQtyChange(item.id, item.quantity + 1)}
-                                                disabled={updatingId === item.id || item.quantity >= item.availableQuantity}
-                                                title={item.quantity >= item.availableQuantity ? "Max available quantity reached" : "Increase quantity"}
+                                                disabled={updatingId === item.id || unavailable || item.quantity >= item.availableQuantity}
+                                                title={unavailable
+                                                    ? "Item not available"
+                                                    : item.quantity >= item.availableQuantity
+                                                        ? "Max available quantity reached"
+                                                        : "Increase quantity"}
                                             >
                                                 +
                                             </button>
@@ -93,7 +107,8 @@ function CartModal({ cart, onUpdateQuantity, onRemoveItem, onClearCart, onClose 
                                         </button>
                                     </div>
                                 </div>
-                            ))}
+                            );
+                            })}
                         </div>
                     )}
                 </div>
