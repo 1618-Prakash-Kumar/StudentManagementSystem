@@ -17,7 +17,7 @@ function CreateProduct() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/categories");
+                const response = await fetch("https://collegeexchange-backend.onrender.com/api/categories");
 
                 if (!response.ok) {
                     throw new Error("Unable to load categories");
@@ -58,7 +58,7 @@ function CreateProduct() {
         try {
             setSubmitting(true);
 
-            const response = await fetch("http://localhost:8080/api/products", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/products", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

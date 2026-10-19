@@ -70,7 +70,7 @@ function Home() {
 
         try {
             setLoading(true);
-            const response = await fetch("http://localhost:8080/api/products", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/products", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -98,7 +98,7 @@ function Home() {
     // Fetch categories
     const fetchCategories = async () => {
         try {
-            const response = await fetch("http://localhost:8080/api/categories");
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/categories");
             if (response.ok) {
                 const data = await response.json();
                 setCategories(data);
@@ -117,7 +117,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("http://localhost:8080/api/cart", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/cart", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -137,7 +137,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("http://localhost:8080/api/notifications", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/notifications", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -186,7 +186,7 @@ function Home() {
         const qtyToAdd = cartAddQuantities[product.id] || 1;
 
         try {
-            const response = await fetch("http://localhost:8080/api/cart/items", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/cart/items", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -223,7 +223,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/api/cart/items/${cartItemId}`, {
+            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/cart/items/${cartItemId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -250,7 +250,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/api/cart/items/${cartItemId}`, {
+            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/cart/items/${cartItemId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -272,7 +272,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("http://localhost:8080/api/cart", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/cart", {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -293,7 +293,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/api/notifications/${notifId}/read`, {
+            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/notifications/${notifId}/read`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -313,7 +313,7 @@ function Home() {
         if (!token) return;
 
         try {
-            const response = await fetch("http://localhost:8080/api/notifications/read-all", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/notifications/read-all", {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -345,7 +345,7 @@ function Home() {
 
         try {
             setSubmitting(true);
-            const response = await fetch("http://localhost:8080/api/products", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/products", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

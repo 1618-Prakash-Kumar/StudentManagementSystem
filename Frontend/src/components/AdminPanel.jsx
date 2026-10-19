@@ -39,7 +39,7 @@ function AdminPanel() {
 
         try {
             setLoading(true);
-            const response = await fetch("http://localhost:8080/api/admin/users", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/admin/users", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -78,7 +78,7 @@ function AdminPanel() {
         setActionMessage({ type: "", text: "" });
 
         try {
-            const response = await fetch(`http://localhost:8080/api/admin/users/${userId}/role`, {
+            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/admin/users/${userId}/role`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -114,7 +114,7 @@ function AdminPanel() {
         setCreatingUser(true);
 
         try {
-            const response = await fetch("http://localhost:8080/api/admin/users", {
+            const response = await fetch("https://collegeexchange-backend.onrender.com/api/admin/users", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -170,7 +170,7 @@ function AdminPanel() {
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+            const response = await fetch(`https://collegeexchange-backend.onrender.com/api/admin/users/${userId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
