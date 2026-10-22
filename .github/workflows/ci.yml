@@ -36,9 +36,9 @@ jobs:
       DB_USERNAME: ci_user
       DB_PASSWORD: ci_password
       JWT_SECRET: ci-only-test-secret-key-at-least-32-characters-long
-      CLOUDINARY_CLOUD_NAME: ""
-      CLOUDINARY_API_KEY: ""
-      CLOUDINARY_API_SECRET: ""
+CLOUDINARY_CLOUD_NAME: test-cloud
+CLOUDINARY_API_KEY: test-key
+CLOUDINARY_API_SECRET: test-secret
 
     steps:
       - name: Checkout code
