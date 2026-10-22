@@ -36,9 +36,9 @@ jobs:
       DB_USERNAME: ci_user
       DB_PASSWORD: ci_password
       JWT_SECRET: ci-only-test-secret-key-at-least-32-characters-long
-CLOUDINARY_CLOUD_NAME: test-cloud
-CLOUDINARY_API_KEY: test-key
-CLOUDINARY_API_SECRET: test-secret
+      CLOUDINARY_CLOUD_NAME: test-cloud
+      CLOUDINARY_API_KEY: test-key
+      CLOUDINARY_API_SECRET: test-secret
 
     steps:
       - name: Checkout code
@@ -69,7 +69,6 @@ CLOUDINARY_API_SECRET: test-secret
           node-version: '24'
           cache: npm
           cache-dependency-path: Frontend/package-lock.json
-
 
       - name: Install dependencies
         run: npm ci --prefix Frontend
